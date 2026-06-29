@@ -1,0 +1,23 @@
+# Caches de build (Ajout de /app/build pour être sûr de ne rien rater)
+.gradle/
+/build/
+/app/build/
+.externalNativeBuild/
+.cxx/
+/captures/
+
+# Fichiers de configuration locale (Le doublon a été nettoyé)
+local.properties
+
+# Fichiers de configuration Android Studio / IDEA
+*.iml
+/.idea/workspace.xml
+/.idea/tasks.xml
+/.idea/assetWizardSettings.xml
+/.idea/modules.xml
+/.idea/caches/
+/.idea/navEditor.xml
+/.idea/libraries/
+
+# Système
+.DS_Store

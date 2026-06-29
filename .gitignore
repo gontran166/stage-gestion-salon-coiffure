@@ -1,0 +1,33 @@
+# ==========================================
+# Fichiers Système (OS)
+# ==========================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==========================================
+# Logs et Caches Globaux
+# ==========================================
+*.log
+.npm/
+.eslintcache
+
+# ==========================================
+# Environnement et Clés (Sécurité)
+# ==========================================
+.env
+.env.local
+*.pem
+*.key
+
+# ==========================================
+# Configuration d'IDE au niveau Global
+# (Si vous ouvrez le grand dossier dans un éditeur)
+# ==========================================
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
