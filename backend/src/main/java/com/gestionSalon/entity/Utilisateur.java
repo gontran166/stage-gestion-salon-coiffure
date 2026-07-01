@@ -1,16 +1,29 @@
 package com.gestionSalon.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-
-@Entity
-@Table(name = "Utilisateur")
 @Data
-public class Utilisateur {
+@Builder                    // Permet d'utiliser Utilisateur.builder()
+@AllArgsConstructor         // Requis par @Builder
+@NoArgsConstructor
+@Entity
+@Table(name = "utilisateurs")
+public class Utilisateur implements UserDetails { // Implémentation obligatoire pour Spring Security
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,10 +34,10 @@ public class Utilisateur {
     @Column(nullable = false, length = 100)
     private String prenom;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 20)
     private String telephone;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Column(nullable = false)
@@ -32,22 +45,24 @@ public class Utilisateur {
 
     @Column(nullable = false)
     private Boolean actif = true;
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     private LocalDateTime dateCreation;
+
+    @UpdateTimestamp
     private LocalDateTime dateModification;
 
-    // suppression logique
+    @Column(nullable = false)
     private Boolean supprimee = false;
     private LocalDateTime dateSuppression;
 
-    @OneToOne(mappedBy = "Utilisateur")
-    private List<Role> role;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 
-    //----Constructeurs vide-----
-    public Utilisateur(){
-
-    }
-    //-----Constructeur parametré---
-    public Utilisateur(String nom, String prenom, String telephone, String email,String motDePasse) {
+    // Constructeur paramétré
+    public Utilisateur(String nom, String prenom, String telephone, String email, String motDePasse) {
         this.nom = nom;
         this.prenom = prenom;
         this.telephone = telephone;
@@ -55,4 +70,56 @@ public class Utilisateur {
         this.motDePasse = motDePasse;
     }
 
+    // =========================================================================
+    // Méthodes de l'interface UserDetails pour la gestion des privilèges
+    // =========================================================================
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+
+        if (role != null) {
+            // 1. Ajouter le rôle principal (Ex: ROLE_ADMIN, ROLE_CLIENT)
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getNom()));
+
+            // 2. Ajouter toutes les permissions associées à ce rôle (Ex: USER_READ, USER_CREATE)
+            if (role.getPermissions() != null) {
+                role.getPermissions().forEach(permission -> {
+                    authorities.add(new SimpleGrantedAuthority(permission.getNom()));
+                });
+            }
+        }
+        return authorities;
+    }
+
+    @Override
+    public String getPassword() {
+        return this.motDePasse;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email; // Notre identifiant de connexion est l'adresse email
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true; // Le compte n'expire pas
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true; // Le compte n'est pas verrouillé
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true; // Les identifiants n'expirent pas
+    }
+
+    @Override
+    public boolean isEnabled() {
+        // Le compte est fonctionnel s'il est marqué comme actif et non supprimé logiquement
+        return this.actif && !this.supprimee;
+    }
 }
