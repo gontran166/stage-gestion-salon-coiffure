@@ -49,7 +49,6 @@ public class UtilisateurService {
                 .nom(utilisateur.getNom())
                 .prenom(utilisateur.getPrenom())
                 .telephone(utilisateur.getTelephone())
-                .email(utilisateur.getEmail())
                 .role(utilisateur.getRole().getNom())
                 .actif(utilisateur.getActif())
                 .build();
@@ -64,15 +63,6 @@ public class UtilisateurService {
                         .getAuthentication()
                         .getPrincipal();
 
-        if (utilisateurRepository.existsByEmailAndIdNot(
-                dto.getEmail(),
-                utilisateur.getId())) {
-
-            throw new IllegalArgumentException(
-                    "Cet email est déjà utilisé."
-            );
-        }
-
         if (utilisateurRepository.existsByTelephoneAndIdNot(
                 dto.getTelephone(),
                 utilisateur.getId())) {
@@ -84,7 +74,6 @@ public class UtilisateurService {
 
         utilisateur.setNom(dto.getNom());
         utilisateur.setPrenom(dto.getPrenom());
-        utilisateur.setEmail(dto.getEmail());
         utilisateur.setTelephone(dto.getTelephone());
 
         utilisateurRepository.save(utilisateur);
@@ -122,14 +111,6 @@ public class UtilisateurService {
     @Transactional
     public UtilisateurDTO createUser(CreateUtilisateurDTO dto) {
 
-        if (utilisateurRepository.existsByEmail(dto.getEmail())) {
-
-            throw new BusinessValidationException(
-                    "email",
-                    "Cet email est déjà utilisé."
-            );
-        }
-
         if (utilisateurRepository.existsByTelephone(dto.getTelephone())) {
 
             throw new BusinessValidationException(
@@ -150,7 +131,6 @@ public class UtilisateurService {
                 .nom(dto.getNom())
                 .prenom(dto.getPrenom())
                 .telephone(dto.getTelephone())
-                .email(dto.getEmail())
                 .motDePasse(
                         passwordEncoder.encode(
                                 dto.getMotDePasse()
@@ -182,16 +162,6 @@ public class UtilisateurService {
                         )
                 );
 
-        if (utilisateurRepository.existsByEmailAndIdNot(
-                dto.getEmail(),
-                utilisateur.getId()
-        )) {
-
-            throw new BusinessValidationException(
-                    "email",
-                    "Cet email est déjà utilisé."
-            );
-        }
 
         if (utilisateurRepository.existsByTelephoneAndIdNot(
                 dto.getTelephone(),
@@ -206,7 +176,6 @@ public class UtilisateurService {
 
         utilisateur.setNom(dto.getNom());
         utilisateur.setPrenom(dto.getPrenom());
-        utilisateur.setEmail(dto.getEmail());
         utilisateur.setTelephone(dto.getTelephone());
 
         utilisateurRepository.save(utilisateur);

@@ -32,13 +32,7 @@ public class AuthenticationService {
     private final RoleRepository roleRepository;
 
     public TokenResponse inscrireClient(InscriptionDTO dto) {
-        // 1. Vérification de l'unicité de l'email et téléphone
-        if (utilisateurRepository.existsByEmail(dto.getEmail())) {
-            throw new BusinessValidationException(
-                    "email",
-                    "Cet email est déjà utilisé."
-            );
-        }
+        // 1. Vérification de l'unicité du numéro de téléphone
         if (utilisateurRepository.existsByTelephone(dto.getTelephone())) {
             throw new BusinessValidationException(
                     "telephone",
@@ -80,13 +74,13 @@ public class AuthenticationService {
         // 1. Déclencher l'authentification Spring Security (va appeler notre UserDetailsService et valider le mot de passe)
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        dto.getEmail(),
+                        dto.getTelephone(),
                         dto.getMotDePasse()
                 )
         );
 
         // 2. Si l'authentification réussit, on récupère l'utilisateur
-        Utilisateur utilisateur = utilisateurRepository.findByEmailAndSupprimeeFalse(dto.getEmail())
+        Utilisateur utilisateur = utilisateurRepository.findByTelephoneAndSupprimeeFalse(dto.getTelephone())
                 .orElseThrow(() -> new UsernameNotFoundException("Utilisateur introuvable."));
 
         // 3. Génération du token
@@ -149,14 +143,14 @@ public class AuthenticationService {
 
     public TokenResponse refreshToken(RefreshTokenRequest request) {
 
-        String userEmail =
+        String userTelephone =
                 jwtUtils.extractUsername(
                         request.getRefreshToken()
                 );
 
         Utilisateur utilisateur =
                 utilisateurRepository
-                        .findByEmailAndSupprimeeFalse(userEmail)
+                        .findByTelephoneAndSupprimeeFalse(userTelephone)
                         .orElseThrow(
                                 () -> new EntityNotFoundException(
                                         "Utilisateur introuvable"

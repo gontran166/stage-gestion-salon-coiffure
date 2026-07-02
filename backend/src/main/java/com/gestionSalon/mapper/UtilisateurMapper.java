@@ -17,7 +17,6 @@ public class UtilisateurMapper {
                 .nom(utilisateur.getNom())
                 .prenom(utilisateur.getPrenom())
                 .telephone(utilisateur.getTelephone())
-                .email(utilisateur.getEmail())
                 .role(utilisateur.getRole().getNom())
                 .actif(utilisateur.getActif())
                 .build();
@@ -29,7 +28,6 @@ public class UtilisateurMapper {
                 .nom(utilisateur.getNom())
                 .prenom(utilisateur.getPrenom())
                 .telephone(utilisateur.getTelephone())
-                .email(utilisateur.getEmail())
                 .role(utilisateur.getRole().getNom())
                 .actif(utilisateur.getActif())
                 .build();

@@ -28,17 +28,15 @@ public class Utilisateur implements UserDetails { // Implémentation obligatoire
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = true, length = 50)
     private String nom;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = true, length = 100)
     private String prenom;
 
     @Column(nullable = false, unique = true, length = 20)
     private String telephone;
 
-    @Column(nullable = false, unique = true)
-    private String email;
 
     @Column(nullable = false)
     private String motDePasse;
@@ -62,11 +60,10 @@ public class Utilisateur implements UserDetails { // Implémentation obligatoire
     private Role role;
 
     // Constructeur paramétré
-    public Utilisateur(String nom, String prenom, String telephone, String email, String motDePasse) {
+    public Utilisateur(String nom, String prenom, String telephone, String motDePasse) {
         this.nom = nom;
         this.prenom = prenom;
         this.telephone = telephone;
-        this.email = email;
         this.motDePasse = motDePasse;
     }
 
@@ -99,7 +96,7 @@ public class Utilisateur implements UserDetails { // Implémentation obligatoire
 
     @Override
     public String getUsername() {
-        return this.email; // Notre identifiant de connexion est l'adresse email
+        return this.telephone; // Notre identifiant de connexion est le numéro de téléphone
     }
 
     @Override

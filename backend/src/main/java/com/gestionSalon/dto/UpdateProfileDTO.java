@@ -15,8 +15,4 @@ public class UpdateProfileDTO {
 
     @NotBlank
     private String telephone;
-
-    @Email
-    @NotBlank
-    private String email;
 }

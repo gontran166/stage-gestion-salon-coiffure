@@ -25,8 +25,8 @@ public class ApplicationConfig {
             @Override
             public org.springframework.security.core.userdetails.UserDetails loadUserByUsername(String username)
                     throws UsernameNotFoundException {
-                return utilisateurRepository.findByEmailAndSupprimeeFalse(username)
-                        .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé avec l'email : " + username));
+                return utilisateurRepository.findByTelephoneAndSupprimeeFalse(username)
+                        .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé avec le numéro de téléphone : " + username));
             }
         };
     }

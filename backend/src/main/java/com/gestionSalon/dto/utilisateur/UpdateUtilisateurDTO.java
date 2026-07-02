@@ -16,7 +16,4 @@ public class UpdateUtilisateurDTO {
     @NotBlank(message = "Le téléphone est obligatoire")
     private String telephone;
 
-    @Email(message = "Format d'email invalide")
-    @NotBlank(message = "L'email est obligatoire")
-    private String email;
 }
