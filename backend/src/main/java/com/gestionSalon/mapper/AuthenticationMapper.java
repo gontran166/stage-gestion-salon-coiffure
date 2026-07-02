@@ -1,6 +1,6 @@
 package com.gestionSalon.mapper;
 
-import com.gestionSalon.dto.InscriptionDTO;
+import com.gestionSalon.dto.auth.InscriptionDTO;
 import com.gestionSalon.entity.Utilisateur;
 import org.springframework.stereotype.Component;
 

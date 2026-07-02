@@ -1,4 +1,5 @@
-package com.gestionSalon.dto;
+package com.gestionSalon.dto.auth;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,4 +13,6 @@ import lombok.NoArgsConstructor;
 public class TokenResponse {
 
     private String accessToken;
+
+    private String refreshToken;
 }

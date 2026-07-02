@@ -1,8 +1,7 @@
 package com.gestionSalon.controller;
 
-import com.gestionSalon.dto.InscriptionDTO;
-import com.gestionSalon.dto.ConnexionDTO;
-import com.gestionSalon.dto.TokenResponse;
+import com.gestionSalon.dto.auth.*;
+import com.gestionSalon.dto.response.MessageResponse;
 import com.gestionSalon.service.AuthenticationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,5 +28,28 @@ public class AuthenticationController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/change-password")
+    public ResponseEntity<MessageResponse> changePassword(
+            @Valid @RequestBody ChangePasswordDTO dto
+    ) {
+
+        authenticationService.changePassword(dto);
+
+        return ResponseEntity.ok(
+                new MessageResponse(
+                        "Mot de passe modifié avec succès."
+                )
+        );
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<TokenResponse> refreshToken(
+            @Valid @RequestBody RefreshTokenRequest request
+    ) {
+
+        return ResponseEntity.ok(
+                authenticationService.refreshToken(request)
+        );
+    }
 }
 
