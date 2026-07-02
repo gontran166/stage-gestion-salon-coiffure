@@ -20,7 +20,6 @@ public class AuthenticationMapper {
                 .nom(dto.getNom())
                 .prenom(dto.getPrenom())
                 .telephone(dto.getTelephone())
-                .email(dto.getEmail())
                 .build();
     }
 }

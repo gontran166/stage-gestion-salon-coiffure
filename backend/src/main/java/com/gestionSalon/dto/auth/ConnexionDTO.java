@@ -7,9 +7,8 @@ import lombok.Data;
 @Data
 public class ConnexionDTO {
 
-    @NotBlank(message = "L'adresse email est obligatoire")
-    @Email(message = "L'adresse email doit être valide")
-    private String email;
+    @NotBlank(message = "le numéro de téléphone email est obligatoire")
+    private String telephone;
 
     @NotBlank(message = "Le mot de passe est obligatoire")
     private String motDePasse;

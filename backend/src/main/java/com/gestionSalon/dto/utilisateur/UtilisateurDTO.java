@@ -16,7 +16,6 @@ public class UtilisateurDTO {
     private String nom;
     private String prenom;
     private String telephone;
-    private String email;
     private String role;
     private Boolean actif;
 }
