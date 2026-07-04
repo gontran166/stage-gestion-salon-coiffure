@@ -33,7 +33,7 @@ public class AuthenticationService {
 
     public TokenResponse inscrireClient(InscriptionDTO dto) {
         // 1. Vérification de l'unicité du numéro de téléphone
-        if (utilisateurRepository.existsByTelephone(dto.getTelephone())) {
+        if (utilisateurRepository.existsByTelephoneAndSupprimeeFalse(dto.getTelephone())) {
             throw new BusinessValidationException(
                     "telephone",
                     "Ce numéro de téléphone est déjà utilisé."

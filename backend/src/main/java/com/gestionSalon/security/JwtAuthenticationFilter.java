@@ -1,5 +1,6 @@
 package com.gestionSalon.security;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,7 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
-        final String userEmail;
+        final String userTelephone;
 
         // 1. Si pas d'en-tête Authorization ou ne commence pas par Bearer, on passe au filtre suivant
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -42,11 +43,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 2. Extraction du token (Correction : suppression du 'a' parasite)
         jwt = authHeader.substring(7);
-        userEmail = jwtUtils.extractUsername(jwt);
+        try {
+
+            userTelephone = jwtUtils.extractUsername(jwt);
+
+        } catch (JwtException | IllegalArgumentException e) {
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+
+            response.getWriter().write("""
+        {
+          "error":"Unauthorized",
+          "message":"Token invalide ou expire.",
+          "status":401
+        }
+        """);
+
+            return;
+        }
 
         // 3. Si l'email est extrait et que l'utilisateur n'est pas encore authentifié dans le contexte
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+        if (userTelephone != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userTelephone);
 
             // 4. Si le token est valide, on crée l'objet d'authentification pour Spring Security
             if (jwtUtils.isTokenValid(jwt, userDetails)) {

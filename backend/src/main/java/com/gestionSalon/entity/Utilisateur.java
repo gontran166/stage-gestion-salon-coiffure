@@ -59,13 +59,22 @@ public class Utilisateur implements UserDetails { // Implémentation obligatoire
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
-    // Constructeur paramétré
-    public Utilisateur(String nom, String prenom, String telephone, String motDePasse) {
-        this.nom = nom;
-        this.prenom = prenom;
-        this.telephone = telephone;
-        this.motDePasse = motDePasse;
-    }
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "prestataire_prestations",
+            joinColumns = @JoinColumn(name = "prestataire_id"),
+            inverseJoinColumns = @JoinColumn(name = "prestation_id")
+    )
+    private List<Prestation> prestations = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "prestataire",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<HoraireTravail> horairesTravail =
+            new ArrayList<>();
+
 
     // =========================================================================
     // Méthodes de l'interface UserDetails pour la gestion des privilèges

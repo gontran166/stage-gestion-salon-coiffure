@@ -112,7 +112,7 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .error("Unauthorized")
-                .message("Email ou mot de passe incorrect.")
+                .message("numéro de téléphone ou mot de passe incorrect.")
                 .build();
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

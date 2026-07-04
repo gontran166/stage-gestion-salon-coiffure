@@ -7,10 +7,13 @@ import com.gestionSalon.dto.utilisateur.CreateUtilisateurDTO;
 import com.gestionSalon.dto.utilisateur.UpdateRoleDTO;
 import com.gestionSalon.dto.utilisateur.UpdateUtilisateurDTO;
 import com.gestionSalon.dto.utilisateur.UtilisateurDTO;
+import com.gestionSalon.entity.HoraireTravail;
+import com.gestionSalon.entity.Prestation;
 import com.gestionSalon.entity.Role;
 import com.gestionSalon.entity.Utilisateur;
 import com.gestionSalon.exception.BusinessValidationException;
 import com.gestionSalon.mapper.UtilisateurMapper;
+import com.gestionSalon.repository.HoraireTravailRepository;
 import com.gestionSalon.repository.RoleRepository;
 import com.gestionSalon.repository.UtilisateurRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -25,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Service
@@ -35,6 +39,7 @@ public class UtilisateurService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final UtilisateurMapper utilisateurMapper;
+    private final HoraireTravailRepository horaireTravailRepository;
 
     public ProfileDTO getProfil() {
 
@@ -63,7 +68,7 @@ public class UtilisateurService {
                         .getAuthentication()
                         .getPrincipal();
 
-        if (utilisateurRepository.existsByTelephoneAndIdNot(
+        if (utilisateurRepository.existsByTelephoneAndIdNotAndSupprimeeFalse(
                 dto.getTelephone(),
                 utilisateur.getId())) {
 
@@ -111,7 +116,7 @@ public class UtilisateurService {
     @Transactional
     public UtilisateurDTO createUser(CreateUtilisateurDTO dto) {
 
-        if (utilisateurRepository.existsByTelephone(dto.getTelephone())) {
+        if (utilisateurRepository.existsByTelephoneAndSupprimeeFalse(dto.getTelephone())) {
 
             throw new BusinessValidationException(
                     "telephone",
@@ -163,7 +168,7 @@ public class UtilisateurService {
                 );
 
 
-        if (utilisateurRepository.existsByTelephoneAndIdNot(
+        if (utilisateurRepository.existsByTelephoneAndIdNotAndSupprimeeFalse(
                 dto.getTelephone(),
                 utilisateur.getId()
         )) {
@@ -200,6 +205,7 @@ public class UtilisateurService {
             );
         }
 
+        // chercher l'utilisateur à supprimer
         Utilisateur utilisateur = utilisateurRepository
                 .findByIdAndSupprimeeFalse(id)
                 .orElseThrow(() ->
@@ -207,6 +213,16 @@ public class UtilisateurService {
                                 "Utilisateur introuvable."
                         )
                 );
+
+        // vérifier si l'utilisateur est un prestataire et supprimer ses horaires de travail
+        if(utilisateur.getRole().getNom().equals("PRESTATAIRE")){
+            List<HoraireTravail> horaires = horaireTravailRepository.findByPrestataireIdAndSupprimeeFalse(id);
+            for(HoraireTravail horaireTravail: horaires){
+                horaireTravail.setSupprimee(true);
+                horaireTravail.setDateSuppression(LocalDateTime.now());
+                horaireTravailRepository.save(horaireTravail);
+            }
+        }
 
         utilisateur.setSupprimee(true);
         utilisateur.setDateSuppression(LocalDateTime.now());
