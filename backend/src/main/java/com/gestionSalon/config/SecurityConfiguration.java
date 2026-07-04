@@ -1,6 +1,7 @@
 package com.gestionSalon.config;
 
 import com.gestionSalon.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,9 +31,26 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/auth/**").permitAll() // Routes d'authentification publiques
                         .anyRequest().authenticated() // Tout le reste est sécurisé
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // <- Correction ici (.sessionCreationPolicy au lieu de .setSessionCreationPolicy)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(
+                                (request, response, authException) -> {
+
+                                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                    response.setContentType("application/json");
+
+                                    response.getWriter().write("""
+                {
+                  "error":"Unauthorized",
+                  "message":"Authentification requise.",
+                  "status":401
+                }
+                """);
+                                }
+                        )
+                );
 
         return http.build();
     }
