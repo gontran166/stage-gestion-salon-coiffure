@@ -1,4 +1,4 @@
-package com.gestionSalon.dto.horaire;
+package com.gestionSalon.dto.horaireOuverture;
 
 import com.gestionSalon.entity.enumeration.JourSemaine;
 import jakarta.validation.constraints.NotNull;
@@ -7,7 +7,7 @@ import lombok.Data;
 import java.time.LocalTime;
 
 @Data
-public class UpdateHoraireTravailDTO {
+public class CreateHoraireOuvertureDTO {
 
     @NotNull(message = "Le jour est obligatoire.")
     private JourSemaine jourSemaine;

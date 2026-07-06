@@ -1,16 +1,16 @@
-package com.gestionSalon.dto.horaire;
+package com.gestionSalon.dto.rendezvous;
 
-import com.gestionSalon.entity.enumeration.JourSemaine;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Data
-public class UpdateHoraireTravailDTO {
+public class ReporterRendezVousDTO {
 
-    @NotNull(message = "Le jour est obligatoire.")
-    private JourSemaine jourSemaine;
+    @NotNull(message = "La date est obligatoire.")
+    private LocalDate date;
 
     @NotNull(message = "L'heure de début est obligatoire.")
     private LocalTime heureDebut;
