@@ -1,6 +1,6 @@
 package com.gestionSalon.dto.horaire;
 
-import com.gestionSalon.entity.JourSemaine;
+import com.gestionSalon.entity.enumeration.JourSemaine;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 

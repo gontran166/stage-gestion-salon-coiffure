@@ -1,4 +1,4 @@
-package com.gestionSalon.dto.horaire;
+package com.gestionSalon.dto.horaireOuverture;
 
 import com.gestionSalon.entity.enumeration.JourSemaine;
 import lombok.Builder;
@@ -8,7 +8,7 @@ import java.time.LocalTime;
 
 @Data
 @Builder
-public class HoraireTravailDTO {
+public class HoraireOuvertureDTO {
 
     private Long id;
     private JourSemaine jourSemaine;

@@ -1,4 +1,4 @@
-package com.gestionSalon.entity;
+package com.gestionSalon.entity.enumeration;
 
 public enum JourSemaine {
 

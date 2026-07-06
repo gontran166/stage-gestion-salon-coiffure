@@ -29,6 +29,73 @@ VALUES (6, 'ROLE_UPDATE')
 INSERT INTO permissions(id, nom)
 VALUES (7, 'ROLE_PERMISSION_UPDATE')
     ON CONFLICT DO NOTHING;
+INSERT INTO permissions(id, nom)
+VALUES (8, 'PRESTATION_READ')
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO permissions(id, nom)
+VALUES (9, 'PRESTATION_CREATE')
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO permissions(id, nom)
+VALUES (10, 'PRESTATION_UPDATE')
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO permissions(id, nom)
+VALUES (11, 'PRESTATION_DELETE')
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO permissions(id, nom)
+VALUES (12, 'HORAIRE_TRAVAIL_READ')
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO permissions(id, nom)
+VALUES (13, 'HORAIRE_TRAVAIL_CREATE')
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO permissions(id, nom)
+VALUES (14, 'HORAIRE_TRAVAIL_UPDATE')
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO permissions(id, nom)
+VALUES (15, 'HORAIRE_TRAVAIL_DELETE')
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO permissions(id, nom)
+VALUES (16, 'HORAIRE_OUVERTURE_READ')
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO permissions(id, nom)
+VALUES (17, 'HORAIRE_OUVERTURE_CREATE')
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO permissions(id, nom)
+VALUES (18, 'HORAIRE_OUVERTURE_UPDATE')
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO permissions(id, nom)
+VALUES (19, 'HORAIRE_OUVERTURE_DELETE')
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO permissions(id, nom)
+VALUES (20, 'RENDEZ_VOUS_READ')
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO permissions(id, nom)
+VALUES (21, 'RENDEZ_VOUS_CREATE')
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO permissions(id, nom)
+VALUES (22, 'RENDEZ_VOUS_UPDATE')
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO permissions(id, nom)
+VALUES (23, 'RENDEZ_VOUS_CANCEL')
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO permissions(id, nom)
+VALUES (24, 'RENDEZ_VOUS_NO_SHOW')
+    ON CONFLICT DO NOTHING;
 
 
 -- =====================================================
@@ -52,34 +119,11 @@ VALUES (3, 'CLIENT')
 -- ROLE_PERMISSIONS
 -- =====================================================
 
--- ADMIN
+-- ADMIN : toutes les permissions
 
 INSERT INTO role_permissions(role_id, permission_id)
-VALUES (1, 1)
-    ON CONFLICT DO NOTHING;
-
-INSERT INTO role_permissions(role_id, permission_id)
-VALUES (1, 2)
-    ON CONFLICT DO NOTHING;
-
-INSERT INTO role_permissions(role_id, permission_id)
-VALUES (1, 3)
-    ON CONFLICT DO NOTHING;
-
-INSERT INTO role_permissions(role_id, permission_id)
-VALUES (1, 4)
-    ON CONFLICT DO NOTHING;
-
-INSERT INTO role_permissions(role_id, permission_id)
-VALUES (1, 5)
-    ON CONFLICT DO NOTHING;
-
-INSERT INTO role_permissions(role_id, permission_id)
-VALUES (1, 6)
-    ON CONFLICT DO NOTHING;
-
-INSERT INTO role_permissions(role_id, permission_id)
-VALUES (1, 7)
+SELECT 1, id
+FROM permissions
     ON CONFLICT DO NOTHING;
 
 
@@ -89,10 +133,32 @@ INSERT INTO role_permissions(role_id, permission_id)
 VALUES (2, 1)
     ON CONFLICT DO NOTHING;
 
+INSERT INTO role_permissions(role_id, permission_id)
+VALUES (2, 20)
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO role_permissions(role_id, permission_id)
+VALUES (2, 24)
+    ON CONFLICT DO NOTHING;
+
 
 -- CLIENT
 
--- aucune permission spécifique pour l'instant
+INSERT INTO role_permissions(role_id, permission_id)
+VALUES (3, 20)
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO role_permissions(role_id, permission_id)
+VALUES (3, 21)
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO role_permissions(role_id, permission_id)
+VALUES (3, 22)
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO role_permissions(role_id, permission_id)
+VALUES (3, 23)
+    ON CONFLICT DO NOTHING;
 
 
 -- =====================================================
@@ -189,15 +255,15 @@ VALUES(
 
 SELECT setval(
                'permissions_id_seq',
-               COALESCE((SELECT MAX(id) FROM permissions), 1)
+               (SELECT MAX(id) FROM permissions)
        );
 
 SELECT setval(
                'roles_id_seq',
-               COALESCE((SELECT MAX(id) FROM roles), 1)
+               (SELECT MAX(id) FROM roles)
        );
 
 SELECT setval(
                'utilisateurs_id_seq',
-               COALESCE((SELECT MAX(id) FROM utilisateurs), 1)
+               (SELECT MAX(id) FROM utilisateurs)
        );

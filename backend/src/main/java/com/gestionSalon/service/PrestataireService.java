@@ -7,12 +7,14 @@ import com.gestionSalon.dto.prestation.PrestationDTO;
 import com.gestionSalon.dto.prestation.UpdatePrestatairePrestationsDTO;
 import com.gestionSalon.dto.response.MessageResponse;
 import com.gestionSalon.dto.utilisateur.UtilisateurDTO;
+import com.gestionSalon.entity.HoraireOuverture;
 import com.gestionSalon.entity.HoraireTravail;
 import com.gestionSalon.entity.Prestation;
 import com.gestionSalon.entity.Utilisateur;
 import com.gestionSalon.mapper.HoraireTravailMapper;
 import com.gestionSalon.mapper.PrestationMapper;
 import com.gestionSalon.mapper.UtilisateurMapper;
+import com.gestionSalon.repository.HoraireOuvertureRepository;
 import com.gestionSalon.repository.HoraireTravailRepository;
 import com.gestionSalon.repository.PrestationRepository;
 import com.gestionSalon.repository.UtilisateurRepository;
@@ -35,6 +37,18 @@ public class PrestataireService {
     private final PrestationRepository prestationRepository;
     private final HoraireTravailRepository horaireTravailRepository;
     private final HoraireTravailMapper horaireTravailMapper;
+    private final HoraireOuvertureRepository horaireOuvertureRepository;
+
+    private boolean inclusDansHoraireOuverture(
+            LocalTime debutTravail,
+            LocalTime finTravail,
+            LocalTime debutOuverture,
+            LocalTime finOuverture
+    ) {
+
+        return !debutTravail.isBefore(debutOuverture)
+                && !finTravail.isAfter(finOuverture);
+    }
 
 
     public List<UtilisateurDTO> findPrestataire(){
@@ -217,6 +231,43 @@ public class PrestataireService {
             );
         }
 
+        // vérifier que le salon est ouvert pour le jour conserné et que l'horaire de travail est inclu dans l'horaire d'ouverture du salon du jour
+        List<HoraireOuverture> horairesOuverture =
+                horaireOuvertureRepository
+                        .findByJourSemaineAndSupprimeeFalse(
+                                dto.getJourSemaine()
+                        );
+
+        if (horairesOuverture.isEmpty()) {
+
+            throw new IllegalArgumentException(
+                    "Aucun horaire d'ouverture n'est défini pour ce jour."
+            );
+        }
+
+        boolean inclus = false;
+
+        for (HoraireOuverture ouverture : horairesOuverture) {
+
+            if (inclusDansHoraireOuverture(
+                    dto.getHeureDebut(),
+                    dto.getHeureFin(),
+                    ouverture.getHeureDebut(),
+                    ouverture.getHeureFin()
+            )) {
+
+                inclus = true;
+                break;
+            }
+        }
+
+        if (!inclus) {
+
+            throw new IllegalArgumentException(
+                    "L'horaire de travail doit être inclus dans les horaires d'ouverture du salon."
+            );
+        }
+
         // récuperer la liste des horaires de travail existant
         List<HoraireTravail> horairesExistants =
                 horaireTravailRepository
@@ -328,6 +379,43 @@ public class PrestataireService {
 
             throw new IllegalArgumentException(
                     "L'heure de début doit être antérieure à l'heure de fin."
+            );
+        }
+
+        // vérifier que le salon est ouvert pour le jour conserné et que l'horaire de travail est inclu dans l'horaire d'ouverture du salon du jour
+        List<HoraireOuverture> horairesOuverture =
+                horaireOuvertureRepository
+                        .findByJourSemaineAndSupprimeeFalse(
+                                dto.getJourSemaine()
+                        );
+
+        if (horairesOuverture.isEmpty()) {
+
+            throw new IllegalArgumentException(
+                    "Aucun horaire d'ouverture n'est défini pour ce jour."
+            );
+        }
+
+        boolean inclus = false;
+
+        for (HoraireOuverture ouverture : horairesOuverture) {
+
+            if (inclusDansHoraireOuverture(
+                    dto.getHeureDebut(),
+                    dto.getHeureFin(),
+                    ouverture.getHeureDebut(),
+                    ouverture.getHeureFin()
+            )) {
+
+                inclus = true;
+                break;
+            }
+        }
+
+        if (!inclus) {
+
+            throw new IllegalArgumentException(
+                    "L'horaire de travail doit être inclus dans les horaires d'ouverture du salon."
             );
         }
 

@@ -1,7 +1,7 @@
 package com.gestionSalon.repository;
 
 import com.gestionSalon.entity.HoraireTravail;
-import com.gestionSalon.entity.JourSemaine;
+import com.gestionSalon.entity.enumeration.JourSemaine;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

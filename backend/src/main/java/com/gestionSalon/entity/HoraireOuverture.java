@@ -1,8 +1,12 @@
 package com.gestionSalon.entity;
 
+
 import com.gestionSalon.entity.enumeration.JourSemaine;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -12,8 +16,8 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "horaires_travail")
-public class HoraireTravail {
+@Table(name = "horaires_ouverture")
+public class HoraireOuverture {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,15 +34,8 @@ public class HoraireTravail {
     private LocalTime heureFin;
 
     @Column(nullable = false)
-    private Boolean supprimee = false;
+    private Boolean supprimee;
 
     @Column(nullable = true)
     private LocalDateTime dateSuppression;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "prestataire_id",
-            nullable = false
-    )
-    private Utilisateur prestataire;
 }

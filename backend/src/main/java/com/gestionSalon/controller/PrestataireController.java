@@ -19,13 +19,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/prestataires")
+@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 public class PrestataireController {
 
     private final PrestataireService prestataireService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UtilisateurDTO>> getPrestataires(){
         return ResponseEntity.ok(
                 prestataireService.findPrestataire()
@@ -33,7 +33,6 @@ public class PrestataireController {
     }
 
     @PutMapping("/{id}/prestations")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<PrestationDTO>>
     addPrestations(
             @PathVariable Long id,
@@ -50,7 +49,6 @@ public class PrestataireController {
     }
 
     @GetMapping("/{id}/prestations")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<PrestationDTO>>
     getPrestations(
             @PathVariable Long id
