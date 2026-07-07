@@ -42,6 +42,8 @@ public class RendezVous {
     @Column(nullable = false)
     private StatutRendezVous statut;
 
+    @Column(length = 500)
+    private String notes;
 
     @Column(nullable = false)
     private LocalDateTime dateCreation;

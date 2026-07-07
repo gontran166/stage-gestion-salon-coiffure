@@ -122,7 +122,7 @@ public class PrestataireService {
     ) {
 
         Utilisateur prestataire =
-                utilisateurRepository.findById(prestataireId)
+                utilisateurRepository.findByIdAndSupprimeeFalse(prestataireId)
                         .orElseThrow(() ->
                                 new EntityNotFoundException(
                                         "Prestataire introuvable."

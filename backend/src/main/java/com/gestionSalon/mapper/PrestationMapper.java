@@ -14,6 +14,9 @@ public class PrestationMapper {
                 .nom(prestation.getNom())
                 .dureeMinutes(prestation.getDureeMinutes())
                 .prix(prestation.getPrix())
+                .categorie(prestation.getCategorie())
+                .description(prestation.getDescription())
+                .actif(prestation.getActif())
                 .build();
     }
 }

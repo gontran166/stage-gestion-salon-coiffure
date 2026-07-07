@@ -1,6 +1,7 @@
 package com.gestionSalon.service;
 
 import com.gestionSalon.dto.CreneauDisponibleDTO;
+import com.gestionSalon.dto.rendezvous.ChangementStatutRendezVousDTO;
 import com.gestionSalon.dto.rendezvous.CreateRendezVousDTO;
 import com.gestionSalon.dto.rendezvous.RendezVousDTO;
 import com.gestionSalon.dto.rendezvous.ReporterRendezVousDTO;
@@ -242,6 +243,7 @@ public class RendezVousService {
 
     public RendezVousDTO annulerRendezVous(
             Long rendezVousId,
+            ChangementStatutRendezVousDTO dto,
             Utilisateur client
     ){
 
@@ -280,6 +282,13 @@ public class RendezVousService {
         // Annulation
         rendezVous.setStatut(StatutRendezVous.ANNULE);
 
+        // si c'est un prestataire, renseigner le champ note
+        if(estPrestataire){
+            if (dto != null) {
+                rendezVous.setNotes(dto.getNotes());
+            }
+        }
+
         // Sauvegarde
         RendezVous rv = rendezVousRepository.save(rendezVous);
 
@@ -287,17 +296,56 @@ public class RendezVousService {
 
     }
 
-
-    public RendezVousDTO marquerNO_SHOW(
+    public RendezVousDTO marquerHonore(
             Long rendezVousId,
+            ChangementStatutRendezVousDTO dto,
             Utilisateur client
     ){
 
-        if(!client.getRole().getNom().equals("PRESTATAIRE")){
+        // chercher le rendez-vous à annuler
+        RendezVous rendezVous =
+                rendezVousRepository.findByIdAndSupprimeeFalse(rendezVousId)
+                        .orElseThrow(() ->
+                                new EntityNotFoundException(
+                                        "Rendez-vous introuvable."
+                                ));
+
+        // Vérifier que le rendez-vous concerne bien le client ou le prestataire
+        if (!rendezVous.getPrestataire().getId().equals(client.getId())) {
+
             throw new AccessDeniedException(
                     "Vous ne pouvez pas marquer ce rendez-vous no_show."
             );
         }
+
+        // seul les rendez-vous confirmé peuvent être marquer no_show
+        if (rendezVous.getStatut() != StatutRendezVous.CONFIRME) {
+
+            throw new IllegalArgumentException(
+                    "Seuls les rendez-vous confirmés peuvent être marquer no_show."
+            );
+        }
+
+        // marquer no_show
+        rendezVous.setStatut(StatutRendezVous.HONORE);
+
+        // ajouter la note
+        if(dto != null) {
+            rendezVous.setNotes(dto.getNotes());
+        }
+
+        // Sauvegarde
+        RendezVous rv = rendezVousRepository.save(rendezVous);
+
+        return rendezVousMapper.toDTO(rv);
+
+    }
+
+    public RendezVousDTO marquerNO_SHOW(
+            Long rendezVousId,
+            ChangementStatutRendezVousDTO dto,
+            Utilisateur client
+    ){
 
         // chercher le rendez-vous à annuler
         RendezVous rendezVous =
@@ -325,6 +373,11 @@ public class RendezVousService {
 
         // marquer no_show
         rendezVous.setStatut(StatutRendezVous.NO_SHOW);
+
+        // ajouter la note
+        if(dto != null) {
+            rendezVous.setNotes(dto.getNotes());
+        }
 
         // Sauvegarde
         RendezVous rv = rendezVousRepository.save(rendezVous);

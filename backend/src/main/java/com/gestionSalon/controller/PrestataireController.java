@@ -19,13 +19,24 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/prestataires")
-@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 public class PrestataireController {
 
     private final PrestataireService prestataireService;
 
+    @GetMapping("/{id}/prestations")
+    public ResponseEntity<List<PrestationDTO>>
+    getPrestations(
+            @PathVariable Long id
+    ) {
+
+        return ResponseEntity.ok(
+                prestataireService.getPrestations(id)
+        );
+    }
+
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UtilisateurDTO>> getPrestataires(){
         return ResponseEntity.ok(
                 prestataireService.findPrestataire()
@@ -33,6 +44,7 @@ public class PrestataireController {
     }
 
     @PutMapping("/{id}/prestations")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<PrestationDTO>>
     addPrestations(
             @PathVariable Long id,
@@ -48,18 +60,9 @@ public class PrestataireController {
         );
     }
 
-    @GetMapping("/{id}/prestations")
-    public ResponseEntity<List<PrestationDTO>>
-    getPrestations(
-            @PathVariable Long id
-    ) {
-
-        return ResponseEntity.ok(
-                prestataireService.getPrestations(id)
-        );
-    }
 
     @DeleteMapping("/{id}/prestations/{prestationId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MessageResponse>
     removePrestation(
             @PathVariable Long id,
@@ -72,6 +75,7 @@ public class PrestataireController {
     }
 
     @PostMapping("/{id}/horaires-travail")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HoraireTravailDTO>
     createHoraireTravail(
             @PathVariable Long id,
@@ -87,6 +91,7 @@ public class PrestataireController {
     }
 
     @GetMapping("/{id}/horaires-travail")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<HoraireTravailDTO>>
     getHorairesTravail(
             @PathVariable Long id
@@ -98,6 +103,7 @@ public class PrestataireController {
     }
 
     @PutMapping("/{id}/horaires-travail/{horaireId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HoraireTravailDTO>
     updateHoraireTravail(
             @PathVariable Long id,
@@ -115,6 +121,7 @@ public class PrestataireController {
     }
 
     @DeleteMapping("/{id}/horaires-travail/{horaireId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MessageResponse>
     deleteHoraireTravail(
             @PathVariable Long id,

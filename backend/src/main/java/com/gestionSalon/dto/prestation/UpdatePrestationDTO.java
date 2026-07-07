@@ -20,4 +20,8 @@ public class UpdatePrestationDTO {
     @NotNull(message = "Le prix est obligatoire")
     @Positive(message = "Le prix doit être positif")
     private BigDecimal prix;
+
+    private String categorie;
+    private String description;
+    private Boolean actif;
 }

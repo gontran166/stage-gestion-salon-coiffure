@@ -34,9 +34,12 @@ public class PrestationService {
                 .nom(dto.getNom())
                 .dureeMinutes(dto.getDureeMinutes())
                 .prix(dto.getPrix())
+                .categorie(dto.getCategorie())
+                .description(dto.getDescription())
+                .actif(true)
+                .supprimee(false)
                 .build();
 
-        prestation.setSupprimee(false);
 
         prestationRepository.save(prestation);
 
@@ -78,6 +81,9 @@ public class PrestationService {
         prestation.setNom(dto.getNom());
         prestation.setDureeMinutes(dto.getDureeMinutes());
         prestation.setPrix(dto.getPrix());
+        prestation.setCategorie(dto.getCategorie());
+        prestation.setDescription(dto.getDescription());
+        prestation.setActif(dto.getActif());
 
         prestationRepository.save(prestation);
 
