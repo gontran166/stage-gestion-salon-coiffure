@@ -29,6 +29,15 @@ public class Prestation {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal prix;
 
+    @Column(length = 50)
+    private String categorie;
+
+    @Column(nullable = false)
+    private Boolean actif = true;
+
+    @Column(length = 500)
+    private String description;
+
     @Column(nullable = false)
     private Boolean supprimee = false;
 

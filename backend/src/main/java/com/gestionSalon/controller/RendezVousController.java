@@ -1,5 +1,6 @@
 package com.gestionSalon.controller;
 
+import com.gestionSalon.dto.rendezvous.ChangementStatutRendezVousDTO;
 import com.gestionSalon.dto.rendezvous.CreateRendezVousDTO;
 import com.gestionSalon.dto.rendezvous.RendezVousDTO;
 import com.gestionSalon.dto.rendezvous.ReporterRendezVousDTO;
@@ -94,26 +95,49 @@ public class RendezVousController {
     @PatchMapping("/{id}/annuler")
     @PreAuthorize("hasAnyRole('CLIENT','PRESTATAIRE')")
     public ResponseEntity<RendezVousDTO> annulerRendezVous(
-            @PathVariable Long id
+            @PathVariable Long id,
+            @RequestBody(required = false)
+            ChangementStatutRendezVousDTO dto
     ) {
 
         return ResponseEntity.ok(
                 rendezVousService.annulerRendezVous(
                         id,
+                        dto,
                         getCurrentUser()
                 )
         );
     }
 
-    @PatchMapping("/{id}/no_show")
+    @PatchMapping("/{id}/honore")
     @PreAuthorize("hasRole('PRESTATAIRE')")
-    public ResponseEntity<RendezVousDTO> marquerNoShow(
-            @PathVariable Long id
+    public ResponseEntity<RendezVousDTO> marquerCommeHonore(
+            @PathVariable Long id,
+            @RequestBody(required = false)
+            ChangementStatutRendezVousDTO dto
+    ) {
+
+        return ResponseEntity.ok(
+                rendezVousService.marquerHonore(
+                        id,
+                        dto,
+                        getCurrentUser()
+                )
+        );
+    }
+
+    @PatchMapping("/{id}/no-show")
+    @PreAuthorize("hasRole('PRESTATAIRE')")
+    public ResponseEntity<RendezVousDTO> marquerCommeNoShow(
+            @PathVariable Long id,
+            @RequestBody(required = false)
+            ChangementStatutRendezVousDTO dto
     ) {
 
         return ResponseEntity.ok(
                 rendezVousService.marquerNO_SHOW(
                         id,
+                        dto,
                         getCurrentUser()
                 )
         );

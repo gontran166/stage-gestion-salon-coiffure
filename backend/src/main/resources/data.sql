@@ -121,44 +121,44 @@ VALUES (3, 'CLIENT')
 
 -- ADMIN : toutes les permissions
 
-INSERT INTO role_permissions(role_id, permission_id)
-SELECT 1, id
-FROM permissions
-    ON CONFLICT DO NOTHING;
+-- INSERT INTO role_permissions(role_id, permission_id)
+-- SELECT 1, id
+-- FROM permissions
+--    ON CONFLICT DO NOTHING;
 
 
 -- PRESTATAIRE
 
-INSERT INTO role_permissions(role_id, permission_id)
-VALUES (2, 1)
-    ON CONFLICT DO NOTHING;
+-- INSERT INTO role_permissions(role_id, permission_id)
+-- VALUES (2, 1)
+--    ON CONFLICT DO NOTHING;
 
-INSERT INTO role_permissions(role_id, permission_id)
-VALUES (2, 20)
-    ON CONFLICT DO NOTHING;
+-- INSERT INTO role_permissions(role_id, permission_id)
+-- VALUES (2, 20)
+--    ON CONFLICT DO NOTHING;
 
-INSERT INTO role_permissions(role_id, permission_id)
-VALUES (2, 24)
-    ON CONFLICT DO NOTHING;
+-- INSERT INTO role_permissions(role_id, permission_id)
+-- VALUES (2, 24)
+--    ON CONFLICT DO NOTHING;
 
 
 -- CLIENT
 
-INSERT INTO role_permissions(role_id, permission_id)
-VALUES (3, 20)
-    ON CONFLICT DO NOTHING;
+-- INSERT INTO role_permissions(role_id, permission_id)
+-- VALUES (3, 20)
+--    ON CONFLICT DO NOTHING;
 
-INSERT INTO role_permissions(role_id, permission_id)
-VALUES (3, 21)
-    ON CONFLICT DO NOTHING;
+-- INSERT INTO role_permissions(role_id, permission_id)
+-- VALUES (3, 21)
+--    ON CONFLICT DO NOTHING;
 
-INSERT INTO role_permissions(role_id, permission_id)
-VALUES (3, 22)
-    ON CONFLICT DO NOTHING;
+-- INSERT INTO role_permissions(role_id, permission_id)
+-- VALUES (3, 22)
+--    ON CONFLICT DO NOTHING;
 
-INSERT INTO role_permissions(role_id, permission_id)
-VALUES (3, 23)
-    ON CONFLICT DO NOTHING;
+-- INSERT INTO role_permissions(role_id, permission_id)
+-- VALUES (3, 23)
+--    ON CONFLICT DO NOTHING;
 
 
 -- =====================================================

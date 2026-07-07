@@ -13,4 +13,7 @@ public class PrestationDTO {
     private String nom;
     private Integer dureeMinutes;
     private BigDecimal prix;
+    private String categorie;
+    private String description;
+    private Boolean actif;
 }
