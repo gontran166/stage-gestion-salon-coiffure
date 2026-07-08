@@ -4,6 +4,7 @@ import com.gestionSalon.dto.prestation.CreatePrestationDTO;
 import com.gestionSalon.dto.prestation.PrestationDTO;
 import com.gestionSalon.dto.prestation.UpdatePrestationDTO;
 import com.gestionSalon.dto.response.MessageResponse;
+import com.gestionSalon.dto.utilisateur.UtilisateurDTO;
 import com.gestionSalon.service.PrestationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/prestations")
@@ -47,6 +50,16 @@ public class PrestationController {
 
         return ResponseEntity.ok(
                 prestationService.findById(id)
+        );
+    }
+
+    @GetMapping("/{id}/prestataires")
+    public ResponseEntity<List<UtilisateurDTO>> findPrestataires(
+            @PathVariable Long id
+    ) {
+
+        return ResponseEntity.ok(
+                prestationService.findPrestationsPrestataires(id)
         );
     }
 
