@@ -4,9 +4,11 @@ import com.gestionSalon.dto.prestation.CreatePrestationDTO;
 import com.gestionSalon.dto.prestation.PrestationDTO;
 import com.gestionSalon.dto.prestation.UpdatePrestationDTO;
 import com.gestionSalon.dto.response.MessageResponse;
+import com.gestionSalon.dto.utilisateur.UtilisateurDTO;
 import com.gestionSalon.entity.Prestation;
 import com.gestionSalon.entity.Utilisateur;
 import com.gestionSalon.mapper.PrestationMapper;
+import com.gestionSalon.mapper.UtilisateurMapper;
 import com.gestionSalon.repository.PrestationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +24,7 @@ public class PrestationService {
 
     private final PrestationRepository prestationRepository;
     private final PrestationMapper prestationMapper;
+    private final UtilisateurMapper utilisateurMapper;
 
     public PrestationDTO create(CreatePrestationDTO dto) {
 
@@ -57,10 +61,22 @@ public class PrestationService {
                 .map(prestationMapper::toDTO);
     }
 
+    public List<UtilisateurDTO> findPrestationsPrestataires(Long id){
+        // vérifier que la prestataions existe
+        Prestation prestation =
+                prestationRepository.findByIdAndSupprimeeFalse(id)
+                        .orElseThrow(() ->
+                                new EntityNotFoundException(
+                                        "Prestation introuvable."
+                                ));
+        return prestation.getPrestataires().stream().map(utilisateurMapper::toUtilisateurDTO).toList();
+
+    }
+
     public PrestationDTO findById(Long id) {
 
         Prestation prestation =
-                prestationRepository.findById(id)
+                prestationRepository.findByIdAndSupprimeeFalse(id)
                         .orElseThrow(() ->
                                 new EntityNotFoundException(
                                         "Prestation introuvable."
