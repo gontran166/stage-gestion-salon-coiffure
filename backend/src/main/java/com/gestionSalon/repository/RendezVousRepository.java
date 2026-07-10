@@ -30,8 +30,8 @@ public interface RendezVousRepository extends JpaRepository<RendezVous, Long> {
             Utilisateur client
     );
 
-    List<RendezVous> findByPrestataireAndDateAndSupprimeeFalse(
-            Utilisateur prestataire,
+    List<RendezVous> findByPrestataireIdAndDateAndSupprimeeFalseOrderByHeureDebutAsc(
+            Long prestataireId,
             LocalDate date
     );
 }
