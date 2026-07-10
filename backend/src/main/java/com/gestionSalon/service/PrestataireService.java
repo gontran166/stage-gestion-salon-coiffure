@@ -1,5 +1,6 @@
 package com.gestionSalon.service;
 
+import com.gestionSalon.dto.PlanningRendezVousDTO;
 import com.gestionSalon.dto.horaire.CreateHoraireTravailDTO;
 import com.gestionSalon.dto.horaire.HoraireTravailDTO;
 import com.gestionSalon.dto.horaire.UpdateHoraireTravailDTO;
@@ -7,22 +8,18 @@ import com.gestionSalon.dto.prestation.PrestationDTO;
 import com.gestionSalon.dto.prestation.UpdatePrestatairePrestationsDTO;
 import com.gestionSalon.dto.response.MessageResponse;
 import com.gestionSalon.dto.utilisateur.UtilisateurDTO;
-import com.gestionSalon.entity.HoraireOuverture;
-import com.gestionSalon.entity.HoraireTravail;
-import com.gestionSalon.entity.Prestation;
-import com.gestionSalon.entity.Utilisateur;
+import com.gestionSalon.entity.*;
 import com.gestionSalon.mapper.HoraireTravailMapper;
 import com.gestionSalon.mapper.PrestationMapper;
 import com.gestionSalon.mapper.UtilisateurMapper;
-import com.gestionSalon.repository.HoraireOuvertureRepository;
-import com.gestionSalon.repository.HoraireTravailRepository;
-import com.gestionSalon.repository.PrestationRepository;
-import com.gestionSalon.repository.UtilisateurRepository;
+import com.gestionSalon.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -38,6 +35,7 @@ public class PrestataireService {
     private final HoraireTravailRepository horaireTravailRepository;
     private final HoraireTravailMapper horaireTravailMapper;
     private final HoraireOuvertureRepository horaireOuvertureRepository;
+    private final RendezVousRepository rendezVousRepository;
 
     private boolean inclusDansHoraireOuverture(
             LocalTime debutTravail,
@@ -493,5 +491,50 @@ public class PrestataireService {
         horaire.setDateSuppression(LocalDateTime.now());
         horaireTravailRepository.save(horaire);
     }
+
+    public List<PlanningRendezVousDTO> getPlanningJour(
+            Long prestataireId,
+            LocalDate date,
+            Utilisateur utilisateurConnecte
+    ){
+
+        if (!utilisateurConnecte.getId().equals(prestataireId)) {
+            throw new AccessDeniedException(
+                    "Accès refusé au planning d'un autre prestataire."
+            );
+        }
+
+        List<RendezVous> rendezVous =
+                rendezVousRepository
+                        .findByPrestataireIdAndDateAndSupprimeeFalseOrderByHeureDebutAsc(
+                                prestataireId,
+                                date
+                        );
+
+        return rendezVous.stream()
+                .map(rdv -> PlanningRendezVousDTO.builder()
+                        .rendezVousId(rdv.getId())
+                        .date(rdv.getDate())
+                        .heureDebut(rdv.getHeureDebut())
+                        .heureFin(rdv.getHeureFin())
+                        .statut(rdv.getStatut())
+
+                        .clientId(rdv.getClient().getId())
+                        .nomClient(
+                                rdv.getClient().getPrenom()
+                                        + " "
+                                        + rdv.getClient().getNom()
+                        )
+
+                        .prestationId(rdv.getPrestation().getId())
+                        .nomPrestation(
+                                rdv.getPrestation().getNom()
+                        )
+                        .build())
+                .toList();
+
+    }
+
+
 
 }
