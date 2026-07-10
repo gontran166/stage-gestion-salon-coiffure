@@ -76,6 +76,18 @@ public class RendezVousController {
         );
     }
 
+    @GetMapping("/prestataire/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<RendezVousDTO>>
+    getRendezVous(@PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                rendezVousService.getRendezVous(
+                        id
+                )
+        );
+    }
+
     @PatchMapping("/{id}/reporter")
     @PreAuthorize("hasRole('CLIENT')")
     public ResponseEntity<RendezVousDTO> reporterRendezVous(

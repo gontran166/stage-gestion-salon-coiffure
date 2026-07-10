@@ -163,6 +163,22 @@ public class RendezVousService {
 
     }
 
+    public List<RendezVousDTO> getRendezVous(
+            Long id
+    ) {
+        Utilisateur prestataire = utilisateurRepository.findByIdAndSupprimeeFalse(id)
+                .orElseThrow(()->
+                        new EntityNotFoundException(
+                                "Prestataire introuvable."
+                        ));
+
+        return rendezVousRepository.findByPrestataireAndSupprimeeFalseOrderByDateAscHeureDebutAsc(prestataire)
+                .stream()
+                .map(rendezVousMapper::toDTO)
+                .toList();
+
+    }
+
     @Transactional
     public RendezVousDTO reporterRendezVous(
             Long rendezVousId,

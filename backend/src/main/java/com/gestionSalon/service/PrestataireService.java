@@ -5,6 +5,7 @@ import com.gestionSalon.dto.horaire.CreateHoraireTravailDTO;
 import com.gestionSalon.dto.horaire.HoraireTravailDTO;
 import com.gestionSalon.dto.horaire.UpdateHoraireTravailDTO;
 import com.gestionSalon.dto.prestation.PrestationDTO;
+import com.gestionSalon.dto.prestation.UpdatePrestataireCompetenceDTO;
 import com.gestionSalon.dto.prestation.UpdatePrestatairePrestationsDTO;
 import com.gestionSalon.dto.response.MessageResponse;
 import com.gestionSalon.dto.utilisateur.UtilisateurDTO;
@@ -15,6 +16,7 @@ import com.gestionSalon.mapper.UtilisateurMapper;
 import com.gestionSalon.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -113,6 +115,53 @@ public class PrestataireService {
                 .stream()
                 .map(prestationMapper::toDTO)
                 .toList();
+    }
+
+    @Transactional
+    public void addPrestationPrestataires(
+            Long prestationId,
+            UpdatePrestataireCompetenceDTO dto
+    ) throws BadRequestException {
+
+        // s'assurer que le prestataire existe
+        Prestation prestation =
+                prestationRepository.findById(prestationId)
+                        .orElseThrow(() ->
+                                new EntityNotFoundException(
+                                        "Prestation introuvable."
+                                ));
+
+
+        List<Utilisateur> prestataire =
+                utilisateurRepository.findByIdInAndSupprimeeFalse(
+                        dto.getPrestataireIds()
+                );
+
+        if (prestataire.size()
+                != dto.getPrestataireIds().size()) {
+
+            throw new IllegalArgumentException(
+                    "Un ou plusieurs prestataires sont introuvables."
+            );
+        }
+
+        for(Utilisateur utilisateur: prestataire){
+            if (!utilisateur.getRole().getNom().equals("PRESTATAIRE")){
+                throw new BadRequestException("Certains utilisateurs dans la liste ne sont pas des prestataires");
+            }
+        }
+
+
+        for(Utilisateur utilisateur: prestataire){
+            List<Prestation> prestationsActuelles =
+                    utilisateur.getPrestations();
+
+            if (!prestationsActuelles.contains(prestation)) {
+                prestationsActuelles.add(prestation);
+            }
+
+            utilisateurRepository.save(utilisateur);
+        }
     }
 
     public List<PrestationDTO> getPrestations(

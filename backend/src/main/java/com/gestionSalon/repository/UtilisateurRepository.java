@@ -15,6 +15,8 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
 
     Page<Utilisateur> findAllBySupprimeeFalse(Pageable pageable);
 
+    List<Utilisateur> findByIdInAndSupprimeeFalse(List<Long> ids);
+
     Optional<Utilisateur> findByIdAndSupprimeeFalse(Long id);
 
     List<Utilisateur> findByRole_NomAndSupprimeeFalse(String roleNom);

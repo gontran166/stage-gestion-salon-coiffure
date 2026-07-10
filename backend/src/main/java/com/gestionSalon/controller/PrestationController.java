@@ -2,12 +2,15 @@ package com.gestionSalon.controller;
 
 import com.gestionSalon.dto.prestation.CreatePrestationDTO;
 import com.gestionSalon.dto.prestation.PrestationDTO;
+import com.gestionSalon.dto.prestation.UpdatePrestataireCompetenceDTO;
 import com.gestionSalon.dto.prestation.UpdatePrestationDTO;
 import com.gestionSalon.dto.response.MessageResponse;
 import com.gestionSalon.dto.utilisateur.UtilisateurDTO;
+import com.gestionSalon.service.PrestataireService;
 import com.gestionSalon.service.PrestationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,6 +24,7 @@ import java.util.List;
 public class PrestationController {
 
     private final PrestationService prestationService;
+    private final PrestataireService prestataireService;
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -30,6 +34,30 @@ public class PrestationController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(prestationService.create(dto));
+    }
+
+    @PutMapping("/{id}/prestataires")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<MessageResponse>
+    addCompetenceToPrestataires(
+            @PathVariable Long id,
+            @Valid @RequestBody
+            UpdatePrestataireCompetenceDTO dto
+    ) throws BadRequestException {
+
+        prestataireService.addPrestationPrestataires(
+                id,
+                dto
+        );
+
+        return ResponseEntity.ok(
+                MessageResponse.builder()
+                        .message(
+                                "Compétence attribué aux prestataires avec succès."
+                        )
+                        .build()
+        );
+
     }
 
     @GetMapping
