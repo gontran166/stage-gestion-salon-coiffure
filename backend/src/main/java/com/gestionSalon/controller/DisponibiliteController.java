@@ -2,6 +2,8 @@ package com.gestionSalon.controller;
 
 import com.gestionSalon.dto.CreneauDisponibleDTO;
 import com.gestionSalon.service.DisponibiliteService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -17,6 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/creneaux-disponibles")
+@Tag(name = "Gestion des disponiblités des prestataires", description = "Obtenir les créneaux libres en fonction de la prestation, du prestataire et la date choisie")
 @PreAuthorize("isAuthenticated()")
 @RequiredArgsConstructor
 public class DisponibiliteController {
@@ -24,6 +27,7 @@ public class DisponibiliteController {
     private final DisponibiliteService disponibiliteService;
 
     @GetMapping
+    @Operation(summary = "Récupérer les créneaux libres", description = "En fonction d'une prestation, d'un prestataire et d'une date (jour)")
     public ResponseEntity<List<CreneauDisponibleDTO>>
     getCreneauxDisponibles(
 
