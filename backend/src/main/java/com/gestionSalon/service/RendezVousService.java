@@ -1,6 +1,7 @@
 package com.gestionSalon.service;
 
 import com.gestionSalon.dto.CreneauDisponibleDTO;
+import com.gestionSalon.dto.planning.PlanningRendezVousDTO;
 import com.gestionSalon.dto.rendezvous.ChangementStatutRendezVousDTO;
 import com.gestionSalon.dto.rendezvous.CreateRendezVousDTO;
 import com.gestionSalon.dto.rendezvous.RendezVousDTO;
@@ -17,8 +18,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -140,30 +139,19 @@ public class RendezVousService {
     }
 
     public List<RendezVousDTO> getMesRendezVous(
-            Utilisateur utilisateur
+            Utilisateur client
     ) {
-
-        if(utilisateur.getRole().getNom().equals("CLIENT")){
-            return rendezVousRepository
-                    .findByClientAndSupprimeeFalseOrderByDateAscHeureDebutAsc(
-                            utilisateur
-                    )
-                    .stream()
-                    .map(rendezVousMapper::toDTO)
-                    .toList();
-        }else{
-            return rendezVousRepository
-                    .findByPrestataireAndSupprimeeFalseOrderByDateAscHeureDebutAsc(
-                            utilisateur
-                    )
-                    .stream()
-                    .map(rendezVousMapper::toDTO)
-                    .toList();
-        }
+        return rendezVousRepository
+                .findByClientAndSupprimeeFalseOrderByDateAscHeureDebutAsc(
+                        client
+                )
+                .stream()
+                .map(rendezVousMapper::toDTO)
+                .toList();
 
     }
 
-    public List<RendezVousDTO> getRendezVous(
+    public List<PlanningRendezVousDTO> getRendezVous(
             Long id
     ) {
         Utilisateur prestataire = utilisateurRepository.findByIdAndSupprimeeFalse(id)
@@ -172,10 +160,9 @@ public class RendezVousService {
                                 "Prestataire introuvable."
                         ));
 
-        return rendezVousRepository.findByPrestataireAndSupprimeeFalseOrderByDateAscHeureDebutAsc(prestataire)
-                .stream()
-                .map(rendezVousMapper::toDTO)
-                .toList();
+        List<RendezVous> rendezVous = rendezVousRepository.findByPrestataireAndSupprimeeFalseOrderByDateAscHeureDebutAsc(prestataire);
+
+        return rendezVousMapper.toPlanningRendezVousDTOS(rendezVous);
 
     }
 

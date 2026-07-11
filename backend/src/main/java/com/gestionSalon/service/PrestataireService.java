@@ -1,6 +1,6 @@
 package com.gestionSalon.service;
 
-import com.gestionSalon.dto.PlanningRendezVousDTO;
+import com.gestionSalon.dto.planning.PlanningRendezVousDTO;
 import com.gestionSalon.dto.horaire.CreateHoraireTravailDTO;
 import com.gestionSalon.dto.horaire.HoraireTravailDTO;
 import com.gestionSalon.dto.horaire.UpdateHoraireTravailDTO;
@@ -17,7 +17,6 @@ import com.gestionSalon.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.apache.coyote.BadRequestException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -540,50 +539,5 @@ public class PrestataireService {
         horaire.setDateSuppression(LocalDateTime.now());
         horaireTravailRepository.save(horaire);
     }
-
-    public List<PlanningRendezVousDTO> getPlanningJour(
-            Long prestataireId,
-            LocalDate date,
-            Utilisateur utilisateurConnecte
-    ){
-
-        if (!utilisateurConnecte.getId().equals(prestataireId)) {
-            throw new AccessDeniedException(
-                    "Accès refusé au planning d'un autre prestataire."
-            );
-        }
-
-        List<RendezVous> rendezVous =
-                rendezVousRepository
-                        .findByPrestataireIdAndDateAndSupprimeeFalseOrderByHeureDebutAsc(
-                                prestataireId,
-                                date
-                        );
-
-        return rendezVous.stream()
-                .map(rdv -> PlanningRendezVousDTO.builder()
-                        .rendezVousId(rdv.getId())
-                        .date(rdv.getDate())
-                        .heureDebut(rdv.getHeureDebut())
-                        .heureFin(rdv.getHeureFin())
-                        .statut(rdv.getStatut())
-
-                        .clientId(rdv.getClient().getId())
-                        .nomClient(
-                                rdv.getClient().getPrenom()
-                                        + " "
-                                        + rdv.getClient().getNom()
-                        )
-
-                        .prestationId(rdv.getPrestation().getId())
-                        .nomPrestation(
-                                rdv.getPrestation().getNom()
-                        )
-                        .build())
-                .toList();
-
-    }
-
-
 
 }

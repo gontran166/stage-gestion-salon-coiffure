@@ -8,6 +8,8 @@ import com.gestionSalon.dto.response.MessageResponse;
 import com.gestionSalon.dto.utilisateur.UtilisateurDTO;
 import com.gestionSalon.service.PrestataireService;
 import com.gestionSalon.service.PrestationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
@@ -20,6 +22,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/prestations")
+@Tag(name = "Gestion des prestations", description = "Gestion des prestations proposées par le salon")
 @RequiredArgsConstructor
 public class PrestationController {
 
@@ -27,6 +30,7 @@ public class PrestationController {
     private final PrestataireService prestataireService;
 
     @PostMapping
+    @Operation(summary = "Ajouter une nouvelle prestation", description = "Réserver au gérant")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PrestationDTO> create(
             @Valid @RequestBody CreatePrestationDTO dto
@@ -37,6 +41,7 @@ public class PrestationController {
     }
 
     @PutMapping("/{id}/prestataires")
+    @Operation(summary = "Attribuer une prestation (compétence) à des prestataires", description = "Réserver au gérant")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MessageResponse>
     addCompetenceToPrestataires(
@@ -61,6 +66,7 @@ public class PrestationController {
     }
 
     @GetMapping
+    @Operation(summary = "Récupérer les prestations", description = "Récupérer tous les prestations proposées par le salon, accessible à tout utilisateur connectés")
     public ResponseEntity<Page<PrestationDTO>> findAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -72,6 +78,7 @@ public class PrestationController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Récupérer une prestation spécifique", description = "Accessible à tous")
     public ResponseEntity<PrestationDTO> findById(
             @PathVariable Long id
     ) {
@@ -82,6 +89,7 @@ public class PrestationController {
     }
 
     @GetMapping("/{id}/prestataires")
+    @Operation(summary = "Récupérer les prestataires qui savent réaliser une prestation spécifique", description = "Accessible à tous")
     public ResponseEntity<List<UtilisateurDTO>> findPrestataires(
             @PathVariable Long id
     ) {
@@ -92,6 +100,7 @@ public class PrestationController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Modifier une prestation",description = "Réserver au  gérant")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PrestationDTO> update(
             @PathVariable Long id,
@@ -104,6 +113,7 @@ public class PrestationController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Supprimer une prestation",description = "Réserver au gérant")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> delete(
             @PathVariable Long id

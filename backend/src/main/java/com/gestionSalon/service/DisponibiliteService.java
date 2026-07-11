@@ -25,7 +25,7 @@ public class DisponibiliteService {
     private final HoraireTravailRepository horaireTravailRepository;
     private final RendezVousRepository rendezVousRepository;
 
-    private JourSemaine convertirJour(LocalDate date) {
+    public JourSemaine convertirJour(LocalDate date) {
 
         return switch (date.getDayOfWeek()) {
             case MONDAY -> JourSemaine.LUNDI;

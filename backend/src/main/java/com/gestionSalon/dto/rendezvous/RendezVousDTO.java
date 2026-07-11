@@ -4,6 +4,7 @@ import com.gestionSalon.entity.enumeration.StatutRendezVous;
 import lombok.Builder;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -15,10 +16,10 @@ public class RendezVousDTO {
 
     private Long prestationId;
     private String prestationNom;
+    private BigDecimal prixPrestation;
 
     private Long prestataireId;
     private String prestataireNom;
-    private String prestatairePrenom;
 
     private LocalDate date;
 
