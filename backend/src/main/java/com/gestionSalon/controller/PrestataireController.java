@@ -1,7 +1,5 @@
 package com.gestionSalon.controller;
 
-
-
 import com.gestionSalon.dto.horaire.CreateHoraireTravailDTO;
 import com.gestionSalon.dto.horaire.HoraireTravailDTO;
 import com.gestionSalon.dto.horaire.UpdateHoraireTravailDTO;
@@ -9,37 +7,72 @@ import com.gestionSalon.dto.prestation.PrestationDTO;
 import com.gestionSalon.dto.prestation.UpdatePrestatairePrestationsDTO;
 import com.gestionSalon.dto.response.MessageResponse;
 import com.gestionSalon.dto.utilisateur.UtilisateurDTO;
-import com.gestionSalon.entity.Utilisateur;
-import com.gestionSalon.repository.UtilisateurRepository;
 import com.gestionSalon.service.PrestataireService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/prestataires")
-@Tag(name = "Gestion des prestataires",description = "CRUD complet plus d'autres fonctionnalités")
+@Tag(
+        name = "Prestataires",
+        description = """
+                Gestion des prestataires du salon.
+                
+                Ce module permet :
+                - de consulter les prestataires ;
+                - de gérer leurs compétences (prestations réalisées) ;
+                - de gérer leurs horaires de travail.
+                
+                La plupart des opérations sont réservées au gérant du salon.
+                """
+)
 @RequiredArgsConstructor
 public class PrestataireController {
 
     private final PrestataireService prestataireService;
-    private final UtilisateurRepository utilisateurRepository;
-
 
     @GetMapping("/{id}/prestations")
-    @Operation(summary = "Récupérer les prestation (compétence) d'un prestataire",description = "Récupérer les prestations qu'un prestataire donnée sait réaliser")
+    @Operation(
+            summary = "Lister les prestations d'un prestataire",
+            description = """
+                    Retourne la liste des prestations qu'un prestataire
+                    est habilité à réaliser.
+                    
+                    Cette opération est utilisée notamment lors de la prise
+                    de rendez-vous afin de filtrer les prestataires compétents
+                    pour une prestation donnée.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Prestations récupérées avec succès"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Prestataire introuvable"
+            )
+    })
     public ResponseEntity<List<PrestationDTO>>
     getPrestations(
-            @PathVariable Long id
+
+            @Parameter(
+                    description = "Identifiant du prestataire",
+                    example = "2",
+                    required = true
+            )
+            @PathVariable
+            Long id
     ) {
 
         return ResponseEntity.ok(
@@ -48,21 +81,79 @@ public class PrestataireController {
     }
 
     @GetMapping
-    @Operation(summary = "Récupérer la liste des prestataires", description = "Récupérer tous les prestataires du salon, réserver au gérant")
+    @Operation(
+            summary = "Lister les prestataires",
+            description = """
+                    Retourne la liste de tous les prestataires du salon.
+                    
+                    Endpoint réservé au gérant.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Liste des prestataires récupérée avec succès"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Authentification requise"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Accès réservé au gérant"
+            )
+    })
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UtilisateurDTO>> getPrestataires(){
+    public ResponseEntity<List<UtilisateurDTO>> getPrestataires() {
+
         return ResponseEntity.ok(
                 prestataireService.findPrestataire()
         );
     }
 
     @PutMapping("/{id}/prestations")
-    @Operation(summary = "Attribuer des prestations (compétences) à un prestataire", description = "Définir les prestations qu'un prestataire va réaliser. Réserver au gérant")
+    @Operation(
+            summary = "Attribuer des prestations à un prestataire",
+            description = """
+                    Associe une ou plusieurs prestations à un prestataire.
+                    
+                    Ces prestations représentent les compétences du prestataire.
+                    
+                    Endpoint réservé au gérant.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Prestations attribuées avec succès"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Liste des prestations invalide"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Prestataire ou prestation introuvable"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Accès réservé au gérant"
+            )
+    })
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<PrestationDTO>>
     addPrestations(
-            @PathVariable Long id,
-            @Valid @RequestBody
+
+            @Parameter(
+                    description = "Identifiant du prestataire",
+                    example = "2",
+                    required = true
+            )
+            @PathVariable
+            Long id,
+
+            @Valid
+            @RequestBody
             UpdatePrestatairePrestationsDTO dto
     ) {
 
@@ -74,28 +165,85 @@ public class PrestataireController {
         );
     }
 
-
     @DeleteMapping("/{id}/prestations/{prestationId}")
-    @Operation(summary = "Retirer une prestation (compétence) à un prestataire", description = "Réserver au gérant")
+    @Operation(
+            summary = "Retirer une prestation à un prestataire",
+            description = """
+                    Retire une compétence précédemment attribuée à un prestataire.
+                    
+                    Endpoint réservé au gérant.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Prestation retirée avec succès"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Prestataire ou prestation introuvable"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Accès réservé au gérant"
+            )
+    })
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MessageResponse>
     removePrestation(
+
             @PathVariable Long id,
+
             @PathVariable Long prestationId
     ) {
 
         return ResponseEntity.ok(
-                prestataireService.removePrestation(id, prestationId)
+                prestataireService.removePrestation(
+                        id,
+                        prestationId
+                )
         );
     }
 
     @PostMapping("/{id}/horaires-travail")
-    @Operation(summary = "Définir les horaires de travail d'un prestataire", description = "Réserver au gérant")
+    @Operation(
+            summary = "Créer un horaire de travail",
+            description = """
+                    Définit un nouvel horaire de travail pour un prestataire.
+                    
+                    L'horaire doit être inclus dans un horaire d'ouverture
+                    existant du même jour.
+                    
+                    Endpoint réservé au gérant.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Horaire créé avec succès"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Horaire invalide ou hors des horaires d'ouverture"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Prestataire introuvable"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Accès réservé au gérant"
+            )
+    })
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HoraireTravailDTO>
     createHoraireTravail(
+
             @PathVariable Long id,
-            @Valid @RequestBody CreateHoraireTravailDTO dto
+
+            @Valid
+            @RequestBody
+            CreateHoraireTravailDTO dto
     ) {
 
         return ResponseEntity.ok(
@@ -107,10 +255,33 @@ public class PrestataireController {
     }
 
     @GetMapping("/{id}/horaires-travail")
-    @Operation(summary = "Récupérer les horaires de travail d'un prestataire", description = "Réserver au gérant")
+    @Operation(
+            summary = "Lister les horaires de travail",
+            description = """
+                    Retourne tous les horaires de travail configurés
+                    pour un prestataire.
+                    
+                    Endpoint réservé au gérant.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Horaires récupérés avec succès"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Prestataire introuvable"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Accès réservé au gérant"
+            )
+    })
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<HoraireTravailDTO>>
     getHorairesTravail(
+
             @PathVariable Long id
     ) {
 
@@ -120,13 +291,43 @@ public class PrestataireController {
     }
 
     @PutMapping("/{id}/horaires-travail/{horaireId}")
-    @Operation(summary = "Modifier un horaire de travail d'un prestataire", description = "Réserver au gérant")
+    @Operation(
+            summary = "Modifier un horaire de travail",
+            description = """
+                    Modifie un horaire de travail existant.
+                    
+                    Endpoint réservé au gérant.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Horaire modifié avec succès"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Nouvel horaire invalide"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Prestataire ou horaire introuvable"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Accès réservé au gérant"
+            )
+    })
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HoraireTravailDTO>
     updateHoraireTravail(
+
             @PathVariable Long id,
+
             @PathVariable Long horaireId,
-            @Valid @RequestBody UpdateHoraireTravailDTO dto
+
+            @Valid
+            @RequestBody
+            UpdateHoraireTravailDTO dto
     ) {
 
         return ResponseEntity.ok(
@@ -139,11 +340,34 @@ public class PrestataireController {
     }
 
     @DeleteMapping("/{id}/horaires-travail/{horaireId}")
-    @Operation(summary = "Supprimer un horaire de travail d'un prestataire", description = "Réserver au gérant")
+    @Operation(
+            summary = "Supprimer un horaire de travail",
+            description = """
+                    Supprime un horaire de travail d'un prestataire.
+                    
+                    Endpoint réservé au gérant.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Horaire supprimé avec succès"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Prestataire ou horaire introuvable"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Accès réservé au gérant"
+            )
+    })
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MessageResponse>
     deleteHoraireTravail(
+
             @PathVariable Long id,
+
             @PathVariable Long horaireId
     ) {
 
@@ -160,5 +384,4 @@ public class PrestataireController {
                         .build()
         );
     }
-
 }

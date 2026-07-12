@@ -1,14 +1,14 @@
 package com.gestionSalon.controller;
 
-import com.gestionSalon.dto.prestation.CreatePrestationDTO;
-import com.gestionSalon.dto.prestation.PrestationDTO;
-import com.gestionSalon.dto.prestation.UpdatePrestataireCompetenceDTO;
-import com.gestionSalon.dto.prestation.UpdatePrestationDTO;
+import com.gestionSalon.dto.prestation.*;
 import com.gestionSalon.dto.response.MessageResponse;
 import com.gestionSalon.dto.utilisateur.UtilisateurDTO;
 import com.gestionSalon.service.PrestataireService;
 import com.gestionSalon.service.PrestationService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +17,24 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/prestations")
-@Tag(name = "Gestion des prestations", description = "Gestion des prestations proposées par le salon")
+@Tag(
+        name = "Prestations",
+        description = """
+                Gestion des prestations proposées par le salon.
+                
+                Ce module permet :
+                - de créer et modifier les prestations ;
+                - de consulter le catalogue des prestations ;
+                - d'associer une prestation à des prestataires ;
+                - de gérer les images illustrant les prestations.
+                """
+)
 @RequiredArgsConstructor
 public class PrestationController {
 
@@ -30,7 +42,19 @@ public class PrestationController {
     private final PrestataireService prestataireService;
 
     @PostMapping
-    @Operation(summary = "Ajouter une nouvelle prestation", description = "Réserver au gérant")
+    @Operation(
+            summary = "Créer une prestation",
+            description = """
+                    Ajoute une nouvelle prestation au catalogue du salon.
+                    
+                    Endpoint réservé au gérant.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Prestation créée avec succès"),
+            @ApiResponse(responseCode = "400", description = "Données invalides"),
+            @ApiResponse(responseCode = "403", description = "Accès réservé au gérant")
+    })
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PrestationDTO> create(
             @Valid @RequestBody CreatePrestationDTO dto
@@ -41,13 +65,37 @@ public class PrestationController {
     }
 
     @PutMapping("/{id}/prestataires")
-    @Operation(summary = "Attribuer une prestation (compétence) à des prestataires", description = "Réserver au gérant")
+    @Operation(
+            summary = "Associer une prestation à des prestataires",
+            description = """
+                    Définit quels prestataires sont compétents pour réaliser
+                    une prestation donnée.
+                    
+                    Endpoint réservé au gérant.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Prestataires associés avec succès"),
+            @ApiResponse(responseCode = "400", description = "Données invalides"),
+            @ApiResponse(responseCode = "404", description = "Prestation ou prestataire introuvable"),
+            @ApiResponse(responseCode = "403", description = "Accès réservé au gérant")
+    })
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MessageResponse>
     addCompetenceToPrestataires(
-            @PathVariable Long id,
-            @Valid @RequestBody
+
+            @Parameter(
+                    description = "Identifiant de la prestation",
+                    example = "1",
+                    required = true
+            )
+            @PathVariable
+            Long id,
+
+            @Valid
+            @RequestBody
             UpdatePrestataireCompetenceDTO dto
+
     ) throws BadRequestException {
 
         prestataireService.addPrestationPrestataires(
@@ -58,15 +106,25 @@ public class PrestationController {
         return ResponseEntity.ok(
                 MessageResponse.builder()
                         .message(
-                                "Compétence attribué aux prestataires avec succès."
+                                "Compétence attribuée aux prestataires avec succès."
                         )
                         .build()
         );
-
     }
 
     @GetMapping
-    @Operation(summary = "Récupérer les prestations", description = "Récupérer tous les prestations proposées par le salon, accessible à tout utilisateur connectés")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(
+            summary = "Lister les prestations",
+            description = """
+                    Retourne la liste paginée des prestations proposées par le salon.
+                    
+                    Accessible à tout utilisateur authentifié.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Liste récupérée avec succès")
+    })
     public ResponseEntity<Page<PrestationDTO>> findAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -78,9 +136,28 @@ public class PrestationController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Récupérer une prestation spécifique", description = "Accessible à tous")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(
+            summary = "Consulter une prestation",
+            description = """
+                    Retourne les informations détaillées d'une prestation.
+                    
+                    Accessible à tout utilisateur authentifié.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Prestation récupérée avec succès"),
+            @ApiResponse(responseCode = "404", description = "Prestation introuvable")
+    })
     public ResponseEntity<PrestationDTO> findById(
-            @PathVariable Long id
+
+            @Parameter(
+                    description = "Identifiant de la prestation",
+                    example = "1",
+                    required = true
+            )
+            @PathVariable
+            Long id
     ) {
 
         return ResponseEntity.ok(
@@ -89,9 +166,29 @@ public class PrestationController {
     }
 
     @GetMapping("/{id}/prestataires")
-    @Operation(summary = "Récupérer les prestataires qui savent réaliser une prestation spécifique", description = "Accessible à tous")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(
+            summary = "Lister les prestataires d'une prestation",
+            description = """
+                    Retourne les prestataires capables de réaliser
+                    la prestation indiquée.
+                    
+                    Utilisé notamment lors de la prise de rendez-vous.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Liste récupérée avec succès"),
+            @ApiResponse(responseCode = "404", description = "Prestation introuvable")
+    })
     public ResponseEntity<List<UtilisateurDTO>> findPrestataires(
-            @PathVariable Long id
+
+            @Parameter(
+                    description = "Identifiant de la prestation",
+                    example = "1",
+                    required = true
+            )
+            @PathVariable
+            Long id
     ) {
 
         return ResponseEntity.ok(
@@ -100,11 +197,28 @@ public class PrestationController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Modifier une prestation",description = "Réserver au  gérant")
+    @Operation(
+            summary = "Modifier une prestation",
+            description = """
+                    Met à jour les informations d'une prestation.
+                    
+                    Endpoint réservé au gérant.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Prestation modifiée avec succès"),
+            @ApiResponse(responseCode = "400", description = "Données invalides"),
+            @ApiResponse(responseCode = "404", description = "Prestation introuvable"),
+            @ApiResponse(responseCode = "403", description = "Accès réservé au gérant")
+    })
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PrestationDTO> update(
+
             @PathVariable Long id,
-            @Valid @RequestBody UpdatePrestationDTO dto
+
+            @Valid
+            @RequestBody
+            UpdatePrestationDTO dto
     ) {
 
         return ResponseEntity.ok(
@@ -113,12 +227,88 @@ public class PrestationController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Supprimer une prestation",description = "Réserver au gérant")
+    @Operation(
+            summary = "Supprimer une prestation",
+            description = """
+                    Supprime une prestation du catalogue du salon.
+                    
+                    Endpoint réservé au gérant.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Prestation supprimée avec succès"),
+            @ApiResponse(responseCode = "404", description = "Prestation introuvable"),
+            @ApiResponse(responseCode = "403", description = "Accès réservé au gérant")
+    })
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> delete(
+
             @PathVariable Long id
     ) {
 
-        return ResponseEntity.ok(prestationService.delete(id));
+        return ResponseEntity.ok(
+                prestationService.delete(id)
+        );
+    }
+
+    @PostMapping("/{id}/image")
+    @Operation(
+            summary = "Ajouter ou remplacer l'image d'une prestation",
+            description = """
+                    Upload une image associée à une prestation.
+                    
+                    Si une image existe déjà, elle est automatiquement remplacée.
+                    
+                    Endpoint réservé au gérant.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Image enregistrée avec succès"),
+            @ApiResponse(responseCode = "400", description = "Fichier invalide"),
+            @ApiResponse(responseCode = "404", description = "Prestation introuvable"),
+            @ApiResponse(responseCode = "403", description = "Accès réservé au gérant")
+    })
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ImageUploadResponseDTO> uploadImage(
+
+            @PathVariable Long id,
+
+            @RequestParam("file")
+            MultipartFile file
+    ) {
+
+        return ResponseEntity.ok(
+                prestationService.uploadImage(
+                        id,
+                        file
+                )
+        );
+    }
+
+    @DeleteMapping("/{id}/image")
+    @Operation(
+            summary = "Supprimer l'image d'une prestation",
+            description = """
+                    Supprime l'image associée à une prestation ainsi que
+                    le fichier physique stocké sur le serveur.
+                    
+                    Endpoint réservé au gérant.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Image supprimée avec succès"),
+            @ApiResponse(responseCode = "404", description = "Prestation ou image introuvable"),
+            @ApiResponse(responseCode = "403", description = "Accès réservé au gérant")
+    })
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteImage(
+
+            @PathVariable Long id
+    ) {
+
+        prestationService.deleteImage(id);
+
+        return ResponseEntity.noContent()
+                .build();
     }
 }

@@ -25,4 +25,7 @@ public class PlanningRendezVousDTO {
     private Long prestationId;
     private String nomPrestation;
     private BigDecimal prixPrestation;
+
+    private Long prestataireId;
+    private String nomPrestataire;
 }

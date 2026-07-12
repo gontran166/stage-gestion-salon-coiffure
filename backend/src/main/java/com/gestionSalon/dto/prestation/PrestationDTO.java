@@ -15,5 +15,6 @@ public class PrestationDTO {
     private BigDecimal prix;
     private String categorie;
     private String description;
+    private String imageUrl;
     private Boolean actif;
 }

@@ -26,6 +26,7 @@ application:
 
 app:
   frontend-url: http://localhost:5173
+  base-url: http://localhost:8080
 
 springdoc:
   api-docs:

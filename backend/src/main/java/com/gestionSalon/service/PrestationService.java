@@ -1,6 +1,7 @@
 package com.gestionSalon.service;
 
 import com.gestionSalon.dto.prestation.CreatePrestationDTO;
+import com.gestionSalon.dto.prestation.ImageUploadResponseDTO;
 import com.gestionSalon.dto.prestation.PrestationDTO;
 import com.gestionSalon.dto.prestation.UpdatePrestationDTO;
 import com.gestionSalon.dto.response.MessageResponse;
@@ -14,6 +15,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +28,7 @@ public class PrestationService {
     private final PrestationRepository prestationRepository;
     private final PrestationMapper prestationMapper;
     private final UtilisateurMapper utilisateurMapper;
+    private final FileStorageService fileStorageService;
 
     public PrestationDTO create(CreatePrestationDTO dto) {
 
@@ -128,5 +132,84 @@ public class PrestationService {
         return MessageResponse.builder()
                 .message("prestation supprimée avec succès.")
                 .build();
+    }
+
+    @Transactional
+    public ImageUploadResponseDTO uploadImage(
+            Long prestationId,
+            MultipartFile file
+    ) {
+
+        Prestation prestation =
+                prestationRepository
+                        .findByIdAndSupprimeeFalse(prestationId)
+                        .orElseThrow(() ->
+                                new EntityNotFoundException(
+                                        "Prestation introuvable"
+                                )
+                        );
+
+        String ancienneImage =
+                prestation.getImageUrl();
+
+        String nouvelleImage =
+                fileStorageService.uploadPrestationImage(
+                        file,
+                        prestationId
+                );
+
+        if (ancienneImage != null
+                && !ancienneImage.isBlank()) {
+
+            fileStorageService.deleteFile(
+                    ancienneImage
+            );
+        }
+
+        prestation.setImageUrl(
+                nouvelleImage
+        );
+
+        prestationRepository.save(
+                prestation
+        );
+
+        return ImageUploadResponseDTO.builder()
+                .prestationId(
+                        prestation.getId()
+                )
+                .imageUrl(
+                        nouvelleImage
+                )
+                .build();
+    }
+
+    @Transactional
+    public void deleteImage(
+            Long prestationId
+    ) {
+
+        Prestation prestation =
+                prestationRepository
+                        .findByIdAndSupprimeeFalse(prestationId)
+                        .orElseThrow(() ->
+                                new EntityNotFoundException(
+                                        "Prestation introuvable"
+                                )
+                        );
+
+        if (prestation.getImageUrl() != null
+                && !prestation.getImageUrl().isBlank()) {
+
+            fileStorageService.deleteFile(
+                    prestation.getImageUrl()
+            );
+        }
+
+        prestation.setImageUrl(null);
+
+        prestationRepository.save(
+                prestation
+        );
     }
 }

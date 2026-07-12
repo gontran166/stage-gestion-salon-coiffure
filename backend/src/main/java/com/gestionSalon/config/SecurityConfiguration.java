@@ -29,7 +29,7 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> {})
                 .authorizeHttpRequests(req -> req
-                        .requestMatchers("/api/auth/**").permitAll() // Routes d'authentification publiques
+                        .requestMatchers("/api/auth/**","/uploads/**").permitAll() // Routes d'authentification publiques
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",

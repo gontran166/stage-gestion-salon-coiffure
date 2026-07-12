@@ -9,6 +9,8 @@ import com.gestionSalon.dto.utilisateur.UpdateUtilisateurDTO;
 import com.gestionSalon.dto.utilisateur.UtilisateurDTO;
 import com.gestionSalon.service.UtilisateurService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +20,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/users")
-@Tag(name = "Gestion des utilisateurs", description = "Gestion des profils utilisateurs et administration des comptes")
+@Tag(
+        name = "Gestion des utilisateurs",
+        description = """
+                Gestion des comptes utilisateurs du système.
+                
+                Ce module permet :
+                - à chaque utilisateur de consulter et modifier son profil ;
+                - au gérant de gérer les comptes utilisateurs ;
+                - d'attribuer ou modifier les rôles des utilisateurs.
+                """
+)
 @RequiredArgsConstructor
 public class UtilisateurController {
 
@@ -30,21 +40,40 @@ public class UtilisateurController {
 
     @GetMapping("/profile")
     @Operation(
-            summary = "Récupérer son propre profil",
-            description = "Renvoie les informations du profil de l'utilisateur actuellement authentifié."
+            summary = "Consulter son profil",
+            description = """
+                    Retourne les informations du profil de l'utilisateur
+                    actuellement authentifié.
+                    """
     )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Profil récupéré avec succès"),
+            @ApiResponse(responseCode = "401", description = "Authentification requise")
+    })
     public ResponseEntity<ProfileDTO> getProfile() {
-        return ResponseEntity.ok(utilisateurService.getProfil());
+
+        return ResponseEntity.ok(
+                utilisateurService.getProfil()
+        );
     }
 
     @PutMapping("/profile")
     @Operation(
-            summary = "Mettre à jour son propre profil",
-            description = "Permet à l'utilisateur connecté de modifier les informations de son compte."
+            summary = "Modifier son profil",
+            description = """
+                    Permet à l'utilisateur connecté de mettre à jour
+                    les informations de son profil.
+                    """
     )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Profil mis à jour avec succès"),
+            @ApiResponse(responseCode = "400", description = "Données invalides"),
+            @ApiResponse(responseCode = "401", description = "Authentification requise")
+    })
     public ResponseEntity<ProfileDTO> updateProfile(
             @Valid @RequestBody UpdateProfileDTO dto
     ) {
+
         return ResponseEntity.ok(
                 utilisateurService.updateProfile(dto)
         );
@@ -53,10 +82,21 @@ public class UtilisateurController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     @Operation(
-            summary = "Lister tous les utilisateurs (Paginé)",
-            description = "Récupère la liste de tous les utilisateurs inscrits sous forme de page. Réservé aux ADMINISTRATEURS."
+            summary = "Lister les utilisateurs",
+            description = """
+                    Retourne la liste paginée de tous les utilisateurs
+                    enregistrés dans le système.
+                    
+                    Accès réservé au gérant.
+                    """
     )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Liste récupérée avec succès"),
+            @ApiResponse(responseCode = "401", description = "Authentification requise"),
+            @ApiResponse(responseCode = "403", description = "Accès réservé au gérant")
+    })
     public ResponseEntity<Page<UtilisateurDTO>> getAllUsers(
+
             @RequestParam(defaultValue = "0")
             int page,
 
@@ -75,9 +115,20 @@ public class UtilisateurController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     @Operation(
-            summary = "Récupérer un utilisateur par son ID",
-            description = "Cherche et renvoie les détails d'un compte utilisateur spécifique. Réservé aux ADMINISTRATEURS."
+            summary = "Consulter un utilisateur",
+            description = """
+                    Retourne les informations détaillées
+                    d'un utilisateur à partir de son identifiant.
+                    
+                    Accès réservé au gérant.
+                    """
     )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Utilisateur trouvé"),
+            @ApiResponse(responseCode = "404", description = "Utilisateur introuvable"),
+            @ApiResponse(responseCode = "401", description = "Authentification requise"),
+            @ApiResponse(responseCode = "403", description = "Accès réservé au gérant")
+    })
     public ResponseEntity<UtilisateurDTO> getUserById(
             @PathVariable Long id
     ) {
@@ -87,13 +138,21 @@ public class UtilisateurController {
         );
     }
 
-
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     @Operation(
-            summary = "Créer un nouvel utilisateur",
-            description = "Permet à un administrateur d'enregistrer manuellement un nouvel utilisateur en base."
+            summary = "Créer un utilisateur",
+            description = """
+                    Permet au gérant de créer manuellement
+                    un nouvel utilisateur.
+                    """
     )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Utilisateur créé avec succès"),
+            @ApiResponse(responseCode = "400", description = "Données invalides"),
+            @ApiResponse(responseCode = "401", description = "Authentification requise"),
+            @ApiResponse(responseCode = "403", description = "Accès réservé au gérant")
+    })
     public ResponseEntity<UtilisateurDTO> createUser(
             @Valid
             @RequestBody
@@ -110,8 +169,18 @@ public class UtilisateurController {
     @PutMapping("/{id}")
     @Operation(
             summary = "Modifier un utilisateur",
-            description = "Permet à un administrateur de mettre à jour globalement les informations d'un compte. Réservé aux ADMINISTRATEURS."
+            description = """
+                    Permet au gérant de mettre à jour
+                    les informations d'un utilisateur.
+                    """
     )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Utilisateur modifié avec succès"),
+            @ApiResponse(responseCode = "400", description = "Données invalides"),
+            @ApiResponse(responseCode = "404", description = "Utilisateur introuvable"),
+            @ApiResponse(responseCode = "401", description = "Authentification requise"),
+            @ApiResponse(responseCode = "403", description = "Accès réservé au gérant")
+    })
     public ResponseEntity<UtilisateurDTO> updateUser(
             @PathVariable Long id,
             @Valid @RequestBody UpdateUtilisateurDTO dto
@@ -126,8 +195,19 @@ public class UtilisateurController {
     @DeleteMapping("/{id}")
     @Operation(
             summary = "Supprimer un utilisateur",
-            description = "Désactive ou supprime définitivement un utilisateur du système. Réservé aux ADMINISTRATEURS."
+            description = """
+                    Supprime logiquement un utilisateur
+                    afin qu'il ne puisse plus accéder à l'application.
+                    
+                    Accès réservé au gérant.
+                    """
     )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Utilisateur supprimé avec succès"),
+            @ApiResponse(responseCode = "404", description = "Utilisateur introuvable"),
+            @ApiResponse(responseCode = "401", description = "Authentification requise"),
+            @ApiResponse(responseCode = "403", description = "Accès réservé au gérant")
+    })
     public ResponseEntity<MessageResponse> deleteUser(
             @PathVariable Long id
     ) {
@@ -140,9 +220,25 @@ public class UtilisateurController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}/role")
     @Operation(
-            summary = "Changer le rôle d'un utilisateur",
-            description = "Permet d'attribuer un nouveau groupe ou rôle de sécurité à un compte utilisateur. Réservé aux ADMINISTRATEURS."
+            summary = "Modifier le rôle d'un utilisateur",
+            description = """
+                    Permet de changer le rôle attribué à un utilisateur.
+                    
+                    Exemples :
+                    - CLIENT
+                    - PRESTATAIRE
+                    - ADMIN
+                    
+                    Accès réservé au gérant.
+                    """
     )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Rôle modifié avec succès"),
+            @ApiResponse(responseCode = "400", description = "Rôle invalide"),
+            @ApiResponse(responseCode = "404", description = "Utilisateur ou rôle introuvable"),
+            @ApiResponse(responseCode = "401", description = "Authentification requise"),
+            @ApiResponse(responseCode = "403", description = "Accès réservé au gérant")
+    })
     public ResponseEntity<UtilisateurDTO> updateRole(
             @PathVariable Long id,
             @Valid @RequestBody UpdateRoleDTO dto
