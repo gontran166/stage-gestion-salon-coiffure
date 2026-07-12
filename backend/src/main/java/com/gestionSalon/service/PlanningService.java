@@ -30,10 +30,9 @@ public class PlanningService {
     ){
         List<RendezVous> rendezVous =
                 rendezVousRepository
-                        .findByPrestataireIdAndDateAndStatutAndSupprimeeFalseOrderByHeureDebutAsc(
+                        .findByPrestataireIdAndDateAndSupprimeeFalseOrderByHeureDebutAsc(
                                 prestataireId,
-                                date,
-                                StatutRendezVous.CONFIRME
+                                date
                         );
 
         return rendezVousMapper.toPlanningRendezVousDTOS(rendezVous);
@@ -56,14 +55,32 @@ public class PlanningService {
 
         List<RendezVous> rendezVous =
                 rendezVousRepository
-                        .findByPrestataireIdAndStatutAndDateBetweenAndSupprimeeFalseOrderByDateAscHeureDebutAsc(
+                        .findByPrestataireIdAndDateBetweenAndSupprimeeFalseOrderByDateAscHeureDebutAsc(
                                 prestataireId,
-                                StatutRendezVous.CONFIRME,
                                 debutSemaine,
                                 finSemaine
                         );
 
         return rendezVousMapper.toPlanningRendezVousDTOS(rendezVous);
     }
+
+    public List<PlanningRendezVousDTO> getPlanningHebdomadaire(
+            LocalDate dateReference
+    ){
+        LocalDate debutSemaine =
+                dateReference.with(DayOfWeek.MONDAY);
+
+        LocalDate finSemaine =
+                dateReference.with(DayOfWeek.SUNDAY);
+
+        List<RendezVous> rendezVous =
+                rendezVousRepository
+                        .findByDateBetweenAndSupprimeeFalseOrderByDateAscHeureDebutAsc(
+                                debutSemaine,
+                                finSemaine
+                        );
+        return rendezVousMapper.toPlanningRendezVousDTOS(rendezVous);
+    }
+
 
 }

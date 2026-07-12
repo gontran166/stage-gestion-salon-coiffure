@@ -179,6 +179,12 @@ public class UtilisateurService {
             );
         }
 
+        /*Role role = roleRepository.findByNom(dto.getRole())
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Rôle introuvable."));
+
+        utilisateur.setRole(role);*/
+
         utilisateur.setNom(dto.getNom());
         utilisateur.setPrenom(dto.getPrenom());
         utilisateur.setTelephone(dto.getTelephone());

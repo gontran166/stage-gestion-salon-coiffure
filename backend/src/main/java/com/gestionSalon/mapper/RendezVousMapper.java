@@ -60,6 +60,8 @@ public class RendezVousMapper {
                         .prestationId(rdv.getPrestation().getId())
                         .nomPrestation(rdv.getPrestation().getNom())
                         .prixPrestation(rdv.getPrestation().getPrix())
+                        .prestataireId(rdv.getPrestataire().getId())
+                        .nomPrestataire(rdv.getPrestataire().getNom()+" "+rdv.getPrestataire().getPrenom())
                         .build())
                 .toList();
     }
