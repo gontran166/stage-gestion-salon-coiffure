@@ -30,9 +30,10 @@ public class PlanningService {
     ){
         List<RendezVous> rendezVous =
                 rendezVousRepository
-                        .findByPrestataireIdAndDateAndSupprimeeFalseOrderByHeureDebutAsc(
+                        .findByPrestataireIdAndDateAndStatutAndSupprimeeFalseOrderByHeureDebutAsc(
                                 prestataireId,
-                                date
+                                date,
+                                StatutRendezVous.CONFIRME
                         );
 
         return rendezVousMapper.toPlanningRendezVousDTOS(rendezVous);
@@ -55,8 +56,9 @@ public class PlanningService {
 
         List<RendezVous> rendezVous =
                 rendezVousRepository
-                        .findByPrestataireIdAndDateBetweenAndSupprimeeFalseOrderByDateAscHeureDebutAsc(
+                        .findByPrestataireIdAndStatutAndDateBetweenAndSupprimeeFalseOrderByDateAscHeureDebutAsc(
                                 prestataireId,
+                                StatutRendezVous.CONFIRME,
                                 debutSemaine,
                                 finSemaine
                         );
