@@ -31,13 +31,15 @@ public interface RendezVousRepository extends JpaRepository<RendezVous, Long> {
             Utilisateur client
     );
 
-    List<RendezVous> findByPrestataireIdAndDateAndSupprimeeFalseOrderByHeureDebutAsc(
+    List<RendezVous> findByPrestataireIdAndDateAndStatutAndSupprimeeFalseOrderByHeureDebutAsc(
             Long prestataireId,
-            LocalDate date
+            LocalDate date,
+            StatutRendezVous statut
     );
 
-    List<RendezVous> findByPrestataireIdAndDateBetweenAndSupprimeeFalseOrderByDateAscHeureDebutAsc(
+    List<RendezVous> findByPrestataireIdAndStatutAndDateBetweenAndSupprimeeFalseOrderByDateAscHeureDebutAsc(
             Long prestataireId,
+            StatutRendezVous statut,
             LocalDate dateDebut,
             LocalDate dateFin
     );
