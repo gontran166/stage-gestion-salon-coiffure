@@ -119,7 +119,7 @@ public class RendezVousController {
             @ApiResponse(responseCode = "401", description = "Authentification requise"),
             @ApiResponse(responseCode = "403", description = "Réservé aux clients")
     })
-    @PreAuthorize("hasRole('CLIENT')")
+    @PreAuthorize("hasAnyRole('CLIENT','PRESTATAIRE')")
     public ResponseEntity<List<RendezVousDTO>>
     getMesRendezVous() {
 

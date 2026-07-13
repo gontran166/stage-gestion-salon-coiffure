@@ -139,15 +139,25 @@ public class RendezVousService {
     }
 
     public List<RendezVousDTO> getMesRendezVous(
-            Utilisateur client
+            Utilisateur utilisateur
     ) {
-        return rendezVousRepository
-                .findByClientAndSupprimeeFalseOrderByDateAscHeureDebutAsc(
-                        client
-                )
-                .stream()
-                .map(rendezVousMapper::toDTO)
-                .toList();
+        if(utilisateur.getRole().getNom().equals("CLIENT")){
+            return rendezVousRepository
+                    .findByClientAndSupprimeeFalseOrderByDateAscHeureDebutAsc(
+                            utilisateur
+                    )
+                    .stream()
+                    .map(rendezVousMapper::toDTO)
+                    .toList();
+        }else{
+            return rendezVousRepository
+                    .findByPrestataireAndSupprimeeFalseOrderByDateAscHeureDebutAsc(
+                            utilisateur
+                    )
+                    .stream()
+                    .map(rendezVousMapper::toDTO)
+                    .toList();
+        }
 
     }
 
