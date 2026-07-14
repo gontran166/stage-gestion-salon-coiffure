@@ -28,7 +28,7 @@ public interface RendezVousRepository extends JpaRepository<RendezVous, Long> {
     );
 
     List<RendezVous> findByPrestataireAndSupprimeeFalseOrderByDateAscHeureDebutAsc(
-            Utilisateur client
+            Utilisateur prestataire
     );
 
     List<RendezVous> findByPrestataireIdAndDateAndStatutAndSupprimeeFalseOrderByHeureDebutAsc(
@@ -40,6 +40,12 @@ public interface RendezVousRepository extends JpaRepository<RendezVous, Long> {
     List<RendezVous> findByPrestataireIdAndStatutAndDateBetweenAndSupprimeeFalseOrderByDateAscHeureDebutAsc(
             Long prestataireId,
             StatutRendezVous statut,
+            LocalDate dateDebut,
+            LocalDate dateFin
+    );
+
+    List<RendezVous> findByPrestataireIdAndDateBetweenAndSupprimeeFalseOrderByDateAscHeureDebutAsc(
+            Long prestataireId,
             LocalDate dateDebut,
             LocalDate dateFin
     );
