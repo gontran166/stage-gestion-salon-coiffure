@@ -1,5 +1,6 @@
 package com.gestionSalon.controller;
 
+import com.gestionSalon.dto.planning.PlanningRendezVousDTO;
 import com.gestionSalon.dto.rendezvous.ChangementStatutRendezVousDTO;
 import com.gestionSalon.dto.rendezvous.CreateRendezVousDTO;
 import com.gestionSalon.dto.rendezvous.RendezVousDTO;
@@ -23,6 +24,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -103,7 +105,43 @@ public class RendezVousController {
                 );
     }
 
-    @GetMapping
+    @GetMapping("/prestataire/mes-rendez-vous")
+    @Operation(
+            summary = "Consulter mes rendez-vous",
+            description = """
+                    Retourne l'ensemble des rendez-vous associés
+                    au prestataire actuellement connecté.
+                    
+                    Les rendez-vous sont retournés quel que soit leur statut
+                    (confirmé, honoré, annulé ou no-show).
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Liste récupérée avec succès"),
+            @ApiResponse(responseCode = "401", description = "Authentification requise"),
+            @ApiResponse(responseCode = "403", description = "Réservé aux clients")
+    })
+    @PreAuthorize("hasRole('PRESTATAIRE')")
+    public ResponseEntity<List<PlanningRendezVousDTO>>
+    getMesRendezVousPrestataire(
+            @Parameter(
+                    description = "Date appartenant à la semaine recherchée (format : yyyy-MM-dd)",
+                    example = "2026-07-15",
+                    required = true
+            )
+            @RequestParam(required = false)
+            LocalDate date
+    ) {
+
+        return ResponseEntity.ok(
+                rendezVousService.getMesRendezVousPrestataire(
+                        getCurrentUser(),
+                        date
+                )
+        );
+    }
+
+    @GetMapping("/client/mes-rendez-vous")
     @Operation(
             summary = "Consulter mes rendez-vous",
             description = """
@@ -119,12 +157,12 @@ public class RendezVousController {
             @ApiResponse(responseCode = "401", description = "Authentification requise"),
             @ApiResponse(responseCode = "403", description = "Réservé aux clients")
     })
-    @PreAuthorize("hasAnyRole('CLIENT','PRESTATAIRE')")
+    @PreAuthorize("hasRole('CLIENT')")
     public ResponseEntity<List<RendezVousDTO>>
-    getMesRendezVous() {
+    getMesRendezVousClient() {
 
         return ResponseEntity.ok(
-                rendezVousService.getMesRendezVous(
+                rendezVousService.getMesRendezVousClient(
                         getCurrentUser()
                 )
         );

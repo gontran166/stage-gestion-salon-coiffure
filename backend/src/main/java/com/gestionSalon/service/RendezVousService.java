@@ -21,6 +21,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -139,26 +140,46 @@ public class RendezVousService {
         );
     }
 
-    public List<RendezVousDTO> getMesRendezVous(
+    public List<RendezVousDTO> getMesRendezVousClient(
             Utilisateur utilisateur
     ) {
-        if(utilisateur.getRole().getNom().equals("CLIENT")){
-            return rendezVousRepository
-                    .findByClientAndSupprimeeFalseOrderByDateAscHeureDebutAsc(
-                            utilisateur
-                    )
-                    .stream()
-                    .map(rendezVousMapper::toDTO)
-                    .toList();
-        }else{
-            return rendezVousRepository
-                    .findByPrestataireAndSupprimeeFalseOrderByDateAscHeureDebutAsc(
-                            utilisateur
-                    )
-                    .stream()
-                    .map(rendezVousMapper::toDTO)
-                    .toList();
+
+        return rendezVousRepository
+                .findByClientAndSupprimeeFalseOrderByDateAscHeureDebutAsc(
+                        utilisateur
+                )
+                .stream()
+                .map(rendezVousMapper::toDTO)
+                .toList();
+    }
+
+
+    public List<PlanningRendezVousDTO> getMesRendezVousPrestataire(
+            Utilisateur utilisateur,
+            LocalDate dateReference
+    ) {
+
+        if(dateReference != null){
+            LocalDate debutSemaine =
+                    dateReference.with(DayOfWeek.MONDAY);
+
+            LocalDate finSemaine =
+                    dateReference.with(DayOfWeek.SUNDAY);
+
+            List<RendezVous> rdv = rendezVousRepository
+                    .findByPrestataireIdAndDateBetweenAndSupprimeeFalseOrderByDateAscHeureDebutAsc(
+                            utilisateur.getId(),
+                            debutSemaine,
+                            finSemaine
+                    );
+            return rendezVousMapper.toPlanningRendezVousDTOS(rdv);
         }
+
+        List<RendezVous> rdv = rendezVousRepository
+                .findByPrestataireAndSupprimeeFalseOrderByDateAscHeureDebutAsc(
+                        utilisateur
+                );
+        return rendezVousMapper.toPlanningRendezVousDTOS(rdv);
 
     }
 
