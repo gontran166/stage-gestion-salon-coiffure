@@ -63,7 +63,16 @@ public class Utilisateur implements UserDetails { // Implémentation obligatoire
     @JoinTable(
             name = "prestataire_prestations",
             joinColumns = @JoinColumn(name = "prestataire_id"),
-            inverseJoinColumns = @JoinColumn(name = "prestation_id")
+            inverseJoinColumns = @JoinColumn(name = "prestation_id"),
+            uniqueConstraints = {
+                    @UniqueConstraint(
+                            name = "uk_prestataire_prestation",
+                            columnNames = {
+                                    "prestataire_id",
+                                    "prestation_id"
+                            }
+                    )
+            }
     )
     private List<Prestation> prestations = new ArrayList<>();
 
