@@ -18,11 +18,20 @@ public class Role {
     private String nom;
 
     // Définition propre de la table de jointure pour la relation ManyToMany
-    @ManyToMany(fetch = FetchType.EAGER)    // EAGER pour charger les permissions directement avec le rôle (très utile pour la sécurité)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "role_permissions",
             joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "permission_id")
+            inverseJoinColumns = @JoinColumn(name = "permission_id"),
+            uniqueConstraints = {
+                    @UniqueConstraint(
+                            name = "uk_role_permission",
+                            columnNames = {
+                                    "role_id",
+                                    "permission_id"
+                            }
+                    )
+            }
     )
     private List<Permission> permissions;
 
