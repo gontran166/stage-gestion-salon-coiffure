@@ -255,6 +255,7 @@ public class RendezVousService {
 
     }
 
+    // annuler rendez-vous
     public RendezVousDTO annulerRendezVous(
             Long rendezVousId,
             ChangementStatutRendezVousDTO dto,
