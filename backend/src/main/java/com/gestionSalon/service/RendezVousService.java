@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -254,6 +255,7 @@ public class RendezVousService {
 
     }
 
+    // annuler rendez-vous
     public RendezVousDTO annulerRendezVous(
             Long rendezVousId,
             ChangementStatutRendezVousDTO dto,
@@ -292,6 +294,31 @@ public class RendezVousService {
             );
         }
 
+        // Vérifier que le rendez-vous n'est pas déjà passé
+        LocalDateTime debutRendezVous =
+                LocalDateTime.of(
+                        rendezVous.getDate(),
+                        rendezVous.getHeureDebut()
+                );
+
+        if (LocalDateTime.now().isAfter(debutRendezVous)) {
+
+            throw new IllegalArgumentException(
+                    "Ce rendez-vous est déjà passé et ne peut plus être annulé."
+            );
+        }
+
+        // Vérifier le délai minimal de 30 minutes
+        LocalDateTime limiteAnnulation =
+                debutRendezVous.minusMinutes(30);
+
+        if (LocalDateTime.now().isAfter(limiteAnnulation)) {
+
+            throw new IllegalArgumentException(
+                    "L'annulation n'est plus possible moins de 30 minutes avant le rendez-vous."
+            );
+        }
+
         // Annulation
         rendezVous.setStatut(StatutRendezVous.ANNULE);
 
@@ -323,11 +350,11 @@ public class RendezVousService {
                                         "Rendez-vous introuvable."
                                 ));
 
-        // Vérifier que le rendez-vous concerne bien le client ou le prestataire
+        // Vérifier que le rendez-vous concerne bien le prestataire
         if (!rendezVous.getPrestataire().getId().equals(client.getId())) {
 
             throw new AccessDeniedException(
-                    "Vous ne pouvez pas marquer ce rendez-vous no_show."
+                    "Vous ne pouvez pas marquer ce rendez-vous compte honoré."
             );
         }
 
@@ -335,11 +362,25 @@ public class RendezVousService {
         if (rendezVous.getStatut() != StatutRendezVous.CONFIRME) {
 
             throw new IllegalArgumentException(
-                    "Seuls les rendez-vous confirmés peuvent être marquer no_show."
+                    "Seuls les rendez-vous confirmés peuvent être marquer honoré."
             );
         }
 
-        // marquer no_show
+        // vérifier que le rendez-vous est terminé
+        LocalDateTime finRendezVous =
+                LocalDateTime.of(
+                        rendezVous.getDate(),
+                        rendezVous.getHeureFin()
+                );
+
+        if (LocalDateTime.now().isBefore(finRendezVous)) {
+
+            throw new IllegalArgumentException(
+                    "Le rendez-vous n'est pas encore terminé."
+            );
+        }
+
+        // marquer honore
         rendezVous.setStatut(StatutRendezVous.HONORE);
 
         // ajouter la note
@@ -368,7 +409,7 @@ public class RendezVousService {
                                         "Rendez-vous introuvable."
                                 ));
 
-        // Vérifier que le rendez-vous concerne bien le client ou le prestataire
+        // Vérifier que le rendez-vous concerne bien le prestataire
         if (!rendezVous.getPrestataire().getId().equals(client.getId())) {
 
             throw new AccessDeniedException(
@@ -381,6 +422,20 @@ public class RendezVousService {
 
             throw new IllegalArgumentException(
                     "Seuls les rendez-vous confirmés peuvent être marquer no_show."
+            );
+        }
+
+        // vérifier que le rendez-vous est terminé
+        LocalDateTime finRendezVous =
+                LocalDateTime.of(
+                        rendezVous.getDate(),
+                        rendezVous.getHeureFin()
+                );
+
+        if (LocalDateTime.now().isBefore(finRendezVous)) {
+
+            throw new IllegalArgumentException(
+                    "La date ou l'heure du rendez-vous n'est pas encore passé."
             );
         }
 
